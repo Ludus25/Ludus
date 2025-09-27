@@ -38,9 +38,9 @@ namespace XOGameService.API.Controllers
         }
 
         [HttpPost("{id}/move")]
-        public async Task<ActionResult<GameState>> Move(string id, [FromBody] MoveDto dto)
+        public async Task<ActionResult<GameState>> Move(string id, [FromBody] MakeMoveDto makeMoveDto)
         {
-            var gameState = await _gameService.MakeMove(id, dto.CellIndex, dto.Version, ActingUserId());
+            var gameState = await _gameService.MakeMove(id, makeMoveDto.CellIndex, makeMoveDto.Version, ActingUserId());
             return Ok(gameState);
         }
     }

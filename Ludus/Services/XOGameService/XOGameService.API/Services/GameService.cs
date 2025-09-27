@@ -6,11 +6,11 @@ using XOGameService.API.Repositories;
 
 namespace XOGameService.API.Services
 {
-    public class XOGameService : IXOGameService
+    public class GameService : IXOGameService
     {
         private readonly IXOGameRepository _repository;
 
-        public XOGameService(IXOGameRepository repository)
+        public GameService(IXOGameRepository repository)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
@@ -116,6 +116,8 @@ namespace XOGameService.API.Services
                     "Version conflict."
                     );
             }
+
+            return currentState;
         }
 
         private static bool IsFull(Cell[] c) => Array.TrueForAll(c, x => x != Cell.Empty);
