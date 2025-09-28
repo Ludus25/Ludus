@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
+using MatchmakingService.Application.Commands;
+using MatchmakingService.Application.DTOs;
+using MatchmakingService.Application.Services;
 using System.Linq;
-using MatchmakingService.Application;
 
 namespace MatchmakingService.Controllers;
 
@@ -9,28 +10,47 @@ namespace MatchmakingService.Controllers;
 [Route("api/[controller]")]
 public class MatchmakingController : ControllerBase
 {
-    private readonly JoinQueueHandler _joinQueueHandler = new();
+    private readonly JoinCommandHandler _commandHandler;
+    private readonly IMatchRepository _repo;
+
+    public MatchmakingController(JoinCommandHandler commandHandler, IMatchRepository repo)
+    {
+        _commandHandler = commandHandler;
+        _repo = repo;
+    }
 
     [HttpPost("join")]
-    public IActionResult Join([FromBody] JoinRequest payload)
+    public async Task<IActionResult> Join([FromBody] JoinRequest payload)
     {
-        var result = _joinQueueHandler.Handle(payload.PlayerId, payload.Rating);
-        return Ok(new { message = result });
+        var cmd = new JoinCommand(payload.PlayerId, payload.Rating);
+        var res = await _commandHandler.HandleAsync(cmd);
+        return Ok(new { message = res });
     }
 
     [HttpGet("status/{playerId}")]
     public IActionResult Status(string playerId)
     {
-        var status = JoinQueueHandler.GetPlayerStatus(playerId);
-        return Ok(new { status });
+        var match = _repo.GetMatchForPlayer(playerId);
+        if (match != null)
+            return Ok(new { status = "matched", matchId = match.MatchId, players = match.Players.Select(p => p.PlayerId).ToArray() });
+
+        if (_repo.IsPlayerInQueue(playerId))
+            return Ok(new { status = "searching" });
+
+        return Ok(new { status = "not_found" });
     }
 
-    
     [HttpGet("queue")]
     public IActionResult Queue()
     {
-        var snapshot = _joinQueueHandler.GetQueueSnapshot();
+        var snapshot = _repo.GetQueueSnapshot();
         return Ok(snapshot.Select(p => new { p.PlayerId, p.Rating }));
     }
 
+    [HttpGet("matches")]
+    public IActionResult Matches()
+    {
+        var matches = _repo.GetMatchesSnapshot();
+        return Ok(matches.Select(m => new { m.MatchId, players = m.Players.Select(p => new { p.PlayerId, p.Rating }) }));
+    }
 }

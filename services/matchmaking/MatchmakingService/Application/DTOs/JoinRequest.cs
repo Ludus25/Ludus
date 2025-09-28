@@ -1,4 +1,4 @@
-namespace MatchmakingService.Application
+namespace MatchmakingService.Application.DTOs
 {
     public class JoinRequest
     {
