@@ -1,3 +1,4 @@
+using XOGameService.API.Hubs;
 using XOGameService.API.Middlewares;
 using XOGameService.API.Repositories;
 using XOGameService.API.Services;
@@ -20,7 +21,21 @@ builder.Services.AddStackExchangeRedisCache(options =>
 builder.Services.AddScoped<IXOGameRepository, RedisXOGameRepository>();
 builder.Services.AddScoped<IXOGameService, GameService>();
 
+const string CorsPolicy = "AllowAll";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(CorsPolicy, p =>
+        p.SetIsOriginAllowed(_ => true)
+         .AllowAnyHeader()
+         .AllowAnyMethod()
+         .AllowCredentials());
+});
+
+builder.Services.AddSignalR();
+
 var app = builder.Build();
+
+app.UseCors(CorsPolicy);
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
@@ -34,5 +49,7 @@ if (app.Environment.IsDevelopment())
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<GameHub>("/gamehub").RequireCors(CorsPolicy); ;
 
 app.Run();

@@ -1,5 +1,7 @@
-﻿using XOGameService.API.Exceptions;
+﻿using Microsoft.AspNetCore.SignalR;
+using XOGameService.API.Exceptions;
 using XOGameService.API.Exceptions.Enums;
+using XOGameService.API.Hubs;
 using XOGameService.API.Models;
 using XOGameService.API.Models.Enums;
 using XOGameService.API.Repositories;
@@ -9,10 +11,12 @@ namespace XOGameService.API.Services
     public class GameService : IXOGameService
     {
         private readonly IXOGameRepository _repository;
+        private readonly IHubContext<GameHub> _gameHubContext;
 
-        public GameService(IXOGameRepository repository)
+        public GameService(IXOGameRepository repository, IHubContext<GameHub> gameHubContext)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _gameHubContext = gameHubContext ?? throw new ArgumentNullException(nameof(gameHubContext));
         }
 
         public async Task<GameState> CreateGame(string playerXId, string playerOId)
@@ -116,6 +120,8 @@ namespace XOGameService.API.Services
                     "Version conflict."
                     );
             }
+
+            await _gameHubContext.Clients.Group(gameId).SendAsync("MoveMade", currentState);
 
             return currentState;
         }
