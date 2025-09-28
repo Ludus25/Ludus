@@ -31,15 +31,17 @@ const Chat = () => {
       .build();
 
     connect.on("ReceiveMessage", (msg) => {
-      setMessages((prev) => [...prev, msg]);
+      setMessages((prev) =>
+        [...prev, msg].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+      );
     });
 
     connect.on("UpdateUserList", (users) => {
-      setOnlineUsers(users); 
+      setOnlineUsers(users);
     });
 
-
-    connect.start()
+    connect
+      .start()
       .then(() => setConnection(connect))
       .catch((err) => console.error("SignalR error:", err));
 
@@ -47,8 +49,13 @@ const Chat = () => {
   }, [user]);
 
   useEffect(() => {
-    axios.get(`${API_URL}/all`)
-      .then((res) => setMessages(res.data))
+    axios
+      .get(`${API_URL}/messages`) // koristi pravi endpoint
+      .then((res) =>
+        setMessages(
+          res.data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+        )
+      )
       .catch((err) => console.error("Error fetching messages:", err));
   }, []);
 
@@ -174,8 +181,8 @@ const Chat = () => {
                 >
                   <Paper
                     sx={{
-                      px: 3, // horizontal padding
-                      py: 1.5, // vertical padding
+                      px: 3,
+                      py: 1.5,
                       maxWidth: "70%",
                       bgcolor: isOwn ? "primary.main" : "grey.200",
                       color: isOwn ? "white" : "black",
@@ -190,7 +197,9 @@ const Chat = () => {
                         width: 0,
                         height: 0,
                         borderStyle: "solid",
-                        borderWidth: isOwn ? "10px 0 10px 10px" : "10px 10px 10px 0",
+                        borderWidth: isOwn
+                          ? "10px 0 10px 10px"
+                          : "10px 10px 10px 0",
                         borderColor: isOwn
                           ? `transparent transparent transparent ${"#3f51b5"}`
                           : `transparent ${"#e0e0e0"} transparent transparent`,

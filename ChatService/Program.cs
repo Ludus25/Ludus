@@ -1,4 +1,5 @@
 using ChatService.Hubs;
+using ChatService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,7 +10,7 @@ builder.Services.AddCors(options =>
         policy
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .SetIsOriginAllowed(_ => true)  
+            .SetIsOriginAllowed(_ => true)
             .AllowCredentials();
     });
 });
@@ -19,6 +20,9 @@ builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddSingleton<IUserService, UserService>();
+builder.Services.AddSingleton<IMessageService, MessageService>();
 
 var app = builder.Build();
 
@@ -31,7 +35,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseRouting();
-app.UseCors();  
+
+app.UseCors();
+
 app.UseAuthorization();
 
 app.MapControllers();

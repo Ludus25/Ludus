@@ -1,52 +1,55 @@
 using Microsoft.AspNetCore.SignalR;
 using ChatService.Entities;
+using ChatService.Services;
 
-namespace ChatService.Hubs;
-
-public class ChatHub : Hub
+namespace ChatService.Hubs
 {
-    private static readonly Dictionary<string, HashSet<string>> OnlineUsers = new();
-
-    public override async Task OnConnectedAsync()
+    public class ChatHub : Hub
     {
-        var user = Context.GetHttpContext()?.Request.Query["user"].ToString();
-        if (!string.IsNullOrEmpty(user))
+        private readonly IUserService _userService;
+        private readonly IMessageService _messageService;
+
+        public ChatHub(IUserService userService, IMessageService messageService)
         {
-            if (!OnlineUsers.ContainsKey(user))
-                OnlineUsers[user] = new HashSet<string>();
-
-            OnlineUsers[user].Add(Context.ConnectionId);
-
-            await Clients.All.SendAsync("UpdateUserList", OnlineUsers.Keys.ToList());
+            _userService = userService;
+            _messageService = messageService;
         }
-        await base.OnConnectedAsync();
-    }
 
-    public override async Task OnDisconnectedAsync(Exception? exception)
-    {
-        var userEntry = OnlineUsers.FirstOrDefault(x => x.Value.Contains(Context.ConnectionId));
-
-        if (!string.IsNullOrEmpty(userEntry.Key))
+        public override async Task OnConnectedAsync()
         {
-            userEntry.Value.Remove(Context.ConnectionId);
+            var user = Context.GetHttpContext()?.Request.Query["user"].ToString();
 
-            if (userEntry.Value.Count == 0)
-                OnlineUsers.Remove(userEntry.Key);
+            if (!string.IsNullOrEmpty(user))
+            {
+                _userService.AddUser(Context.ConnectionId, user);
 
-            await Clients.All.SendAsync("UpdateUserList", OnlineUsers.Keys.ToList());
+                await Clients.All.SendAsync("UpdateUserList", _userService.GetOnlineUsers());
+            }
+
+            await base.OnConnectedAsync();
         }
-        await base.OnDisconnectedAsync(exception);
-    }
 
-    public async Task SendMessage(string user, string message)
-    {
-        var msg = new Message
+        public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            Sender = user,
-            Text = message,
-            Timestamp = DateTime.UtcNow
-        };
+            _userService.RemoveUser(Context.ConnectionId);
 
-        await Clients.All.SendAsync("ReceiveMessage", msg);
+            await Clients.All.SendAsync("UpdateUserList", _userService.GetOnlineUsers());
+
+            await base.OnDisconnectedAsync(exception);
+        }
+
+        public async Task SendMessage(string user, string message)
+        {
+            var msg = new Message
+            {
+                Sender = user,
+                Text = message,
+                Timestamp = DateTime.UtcNow
+            };
+
+            _messageService.AddMessage(msg);
+
+            await Clients.All.SendAsync("ReceiveMessage", msg);
+        }
     }
 }
