@@ -1,3 +1,11 @@
+using Microsoft.EntityFrameworkCore;
+
+using Messaging;
+using Data;
+using Interfaces;
+using Services;
+using Consumers;
+
 internal class Program
 {
     private static void Main(string[] args)
@@ -7,10 +15,18 @@ internal class Program
         // RabbitMQ configuration
         builder.Services.Configure<RabbitMQSettings>(builder.Configuration.GetSection("RabbitMQ"));
 
+        // DbContext
+        builder.Services.AddDbContext<GameHistoryDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnectionString")));
+
         // Add services to the container.
+        builder.Services.AddScoped<IGameHistoryRepository, GameHistoryRepository>();
+        builder.Services.AddScoped<IGameHistoryService, GameHistoryService>();
+
+        builder.Services.AddHostedService<GameEndedEventConsumer>();
+        builder.Services.AddHostedService<ChatLogEventConsumer>();
+
 
         builder.Services.AddControllers();
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
@@ -23,11 +39,14 @@ internal class Program
             app.UseSwaggerUI();
         }
 
-        app.UseHttpsRedirection();
-
-        app.UseAuthorization();
-
+        app.UseRouting();
         app.MapControllers();
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<GameHistoryDbContext>();
+            db.Database.Migrate();
+        }
 
         app.Run();
     }
