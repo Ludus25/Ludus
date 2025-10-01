@@ -1,10 +1,18 @@
-public class GameHistory
-{
-    public string MatchId { get; set; }
-    public List<string> PlayerUserIds { get; set; }
-    public DateTime StartedAt { get; set; }
-    public DateTime EndedAt { get; set; }
-    public string MoveHistory { get; set; }
+using System.ComponentModel.DataAnnotations;
 
-    public List<ChatMessage> ChatMessages { get; set; }
+namespace Entities
+{
+    public class GameHistory
+    {
+        [Key]
+        public string MatchId { get; set; }
+        public List<string> PlayerUserIds { get; set; }
+        public DateTime StartedAt { get; set; }
+        public DateTime EndedAt { get; set; }
+        public string MoveHistory { get; set; }
+        public string? WinnerUserId { get; set; }
+        public List<ChatMessage> ChatMessages { get; set; }
+    }
+
 }
+
