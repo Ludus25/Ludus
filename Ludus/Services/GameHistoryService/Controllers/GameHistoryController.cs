@@ -1,0 +1,48 @@
+using Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+
+namespace Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class GameHistoryController : ControllerBase
+    {
+        private readonly IGameHistoryService _historyService;
+
+        public GameHistoryController(IGameHistoryService historyService)
+        {
+            _historyService = historyService;
+        }
+
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetGamesByPlayer(string userId, [FromQuery] int limit = 50, [FromQuery] int offset = 0)
+        {
+            var games = await _historyService.GetGamesByUserAsync(userId, limit, offset);
+
+            return Ok(games.Select(g => new
+            {
+                g.MatchId,
+                g.PlayerUserIds,
+                g.StartedAt,
+                g.EndedAt,
+                g.MoveHistory,
+                g.WinnerUserId,
+                ChatCount = g.ChatMessages?.Count ?? 0
+            }));
+        }
+
+        [HttpGet("match/{matchId}")]
+        public async Task<IActionResult> GetByMatch(string matchId)
+        {
+            var match = await _historyService.GetByMatchIdAsync(matchId);
+            if (match == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(match);
+        }
+
+    }
+}
