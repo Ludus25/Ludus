@@ -1,19 +1,35 @@
-public class GameHistoryService : IGameHistoryService
+using Interfaces;
+using Entities;
+
+namespace Services
 {
-    private readonly IGameHistoryRepository _repository;
-
-    public GameHistoryService(IGameHistoryRepository repository)
+    public class GameHistoryService : IGameHistoryService
     {
-        _repository = repository;
-    }
+        private readonly IGameHistoryRepository _repository;
 
-    public async Task<IEnumerable<GameHistory>> GetHistoryByUserAsync(string userId)
-    {
-        return await _repository.GetByUserAsync(userId);
-    }
+        public GameHistoryService(IGameHistoryRepository repository)
+        {
+            _repository = repository;
+        }
 
-    public async Task<GameHistory> GetHistoryByMatchIdAsync(string matchId)
-    {
-        return await _repository.GetByMatchIdAsync(matchId);
+        public Task AppendChatAsync(string matchId, IEnumerable<ChatMessage> messages)
+        {
+            return _repository.AppendChatMessageAsync(matchId, messages);
+        }
+
+        public Task<GameHistory?> GetByMatchIdAsync(string matchId)
+        {
+            return _repository.GetByMatchIdAsync(matchId);
+        }
+
+        public Task<IEnumerable<GameHistory>> GetGamesByUserAsync(string userId, int limit = 50, int offset = 0)
+        {
+            return _repository.GetGamesByUserAsync(userId, limit, offset);
+        }
+
+        public Task SaveGameAsync(GameHistory gameHistory)
+        {
+            return _repository.SaveGameAsync(gameHistory);
+        }
     }
 }
