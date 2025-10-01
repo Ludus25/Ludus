@@ -7,9 +7,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{DC
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "XOGameService", "XOGameService", "{50D84AE7-E1BF-4176-822C-88A4798BCA2E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XOGameService.API", "Services\XOGameService\XOGameService.API\XOGameService.API.csproj", "{91486578-89CE-4A79-8579-AEDA63D7E6C4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XOGameService.API", "Services\XOGameService\XOGameService.API\XOGameService.API.csproj", "{91486578-89CE-4A79-8579-AEDA63D7E6C4}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{95E375DE-C36C-4CC5-9A5B-2769FCC4C185}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameHistoryService", "Services\GameHistoryService\GameHistoryService.csproj", "{18FD1F8D-D8ED-46DB-A466-9F8975383BB4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,6 +27,10 @@ Global
 		{95E375DE-C36C-4CC5-9A5B-2769FCC4C185}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{95E375DE-C36C-4CC5-9A5B-2769FCC4C185}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{95E375DE-C36C-4CC5-9A5B-2769FCC4C185}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18FD1F8D-D8ED-46DB-A466-9F8975383BB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18FD1F8D-D8ED-46DB-A466-9F8975383BB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18FD1F8D-D8ED-46DB-A466-9F8975383BB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18FD1F8D-D8ED-46DB-A466-9F8975383BB4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
