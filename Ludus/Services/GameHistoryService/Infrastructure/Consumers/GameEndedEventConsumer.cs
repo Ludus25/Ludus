@@ -67,7 +67,7 @@ namespace Consumers
 
                     if (dto == null)
                     {
-                        PublishToDead(ea.BasicProperties, body);
+                        await PublishToDead(ea.BasicProperties, body);
                         await _channel.BasicAckAsync(ea.DeliveryTag, false);
                         return;
                     }
