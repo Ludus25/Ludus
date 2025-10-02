@@ -1,6 +1,6 @@
-﻿using Entities;
+﻿using Common.Entities;
 
-namespace Dto
+namespace Common.Dto
 {
     public class ChatLogEventDto
     {

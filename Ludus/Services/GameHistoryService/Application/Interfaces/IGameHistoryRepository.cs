@@ -1,4 +1,4 @@
-﻿using Entities;
+﻿using Common.Entities;
 
 namespace Interfaces
 {

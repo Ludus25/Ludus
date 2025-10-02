@@ -1,7 +1,7 @@
-using Entities;
-using Interfaces;
-using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
+
+using Common.Entities;
+using Interfaces;
 
 namespace Data
 {

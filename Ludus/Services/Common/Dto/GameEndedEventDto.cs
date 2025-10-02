@@ -1,4 +1,4 @@
-﻿namespace Dto
+﻿namespace Common.Dto
 {
     public class GameEndedEventDto
     {

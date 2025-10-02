@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35707.178 d17.12
+VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{DC86A6F3-952E-4A50-B1EC-BE011FEABEF7}"
 EndProject
@@ -12,6 +12,8 @@ EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{95E375DE-C36C-4CC5-9A5B-2769FCC4C185}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameHistoryService", "Services\GameHistoryService\GameHistoryService.csproj", "{18FD1F8D-D8ED-46DB-A466-9F8975383BB4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Services\Common\Common.csproj", "{34C29B69-F666-469B-9FF9-7147BC0AC807}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +33,10 @@ Global
 		{18FD1F8D-D8ED-46DB-A466-9F8975383BB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{18FD1F8D-D8ED-46DB-A466-9F8975383BB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{18FD1F8D-D8ED-46DB-A466-9F8975383BB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34C29B69-F666-469B-9FF9-7147BC0AC807}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34C29B69-F666-469B-9FF9-7147BC0AC807}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34C29B69-F666-469B-9FF9-7147BC0AC807}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34C29B69-F666-469B-9FF9-7147BC0AC807}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -38,5 +44,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{50D84AE7-E1BF-4176-822C-88A4798BCA2E} = {DC86A6F3-952E-4A50-B1EC-BE011FEABEF7}
 		{91486578-89CE-4A79-8579-AEDA63D7E6C4} = {50D84AE7-E1BF-4176-822C-88A4798BCA2E}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {746D238C-0393-4D2A-B198-7C013BCB1778}
 	EndGlobalSection
 EndGlobal

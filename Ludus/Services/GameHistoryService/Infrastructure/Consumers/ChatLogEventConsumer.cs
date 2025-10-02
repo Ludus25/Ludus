@@ -6,9 +6,7 @@ using Interfaces;
 using Messaging;
 using System.Text;
 using System.Text.Json;
-using Dto;
-using Entities;
-using System.Threading.Tasks;
+using Common.Dto;
 
 namespace Consumers
 {

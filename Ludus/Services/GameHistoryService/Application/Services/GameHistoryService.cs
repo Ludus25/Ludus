@@ -1,5 +1,5 @@
 using Interfaces;
-using Entities;
+using Common.Entities;
 
 namespace Services
 {
