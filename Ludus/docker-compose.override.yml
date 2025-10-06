@@ -15,3 +15,17 @@ services:
       - xogamedb
     ports:
       - "8001:8080"
+
+  ludusgateways:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - Jwt__Authority=http://auth-service:8080
+      - Jwt__Audience=gateway
+      - Jwt__RequireHttpsMetadata=false
+    depends_on:
+      - xogamedb
+      - xogameservice.api
+    ports:
+      - "8010:8080"
+
