@@ -1,0 +1,17 @@
+services:
+  xogamedb:
+    container_name: xogamedb
+    restart: always
+    ports:
+      - "6379:6379"
+
+  xogameservice.api:
+    container_name: xogame.api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - "RedisCacheSettings:ConnectionString=xogamedb:6379" 
+    depends_on:
+      - xogamedb
+    ports:
+      - "8001:8080"
