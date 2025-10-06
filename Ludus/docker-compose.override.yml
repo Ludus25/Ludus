@@ -20,6 +20,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
+      - Jwt__Authority=http://auth-service:8080
+      - Jwt__Audience=gateway
+      - Jwt__RequireHttpsMetadata=false
     depends_on:
       - xogamedb
       - xogameservice.api
