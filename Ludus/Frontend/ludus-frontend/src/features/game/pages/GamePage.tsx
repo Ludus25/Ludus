@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { useGame } from '../model/useGame';
 import Board from '../ui/Board';
 import { isInProgress, statusText } from '../model/types';
+import { Card, Row, Col, Input, Button, Typography, Space, Alert, Divider } from 'antd';
 
+const { Title, Text } = Typography;
 const empty9 = Array(9).fill(0) as any;
 
 export default function GamePage() {
@@ -13,77 +15,66 @@ export default function GamePage() {
   const [gid, setGid] = useState('');
 
   return (
-    <div style={{ display: 'grid', gap: 12 }}>
-      <h2>XO</h2>
+    <Space direction="vertical" size="large" style={{ width: '100%' }}>
+      <Title level={2}>XO</Title>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-        <div>
-          <h3>Kreiraj</h3>
-          <input
-            value={x}
-            onChange={(e) => setX(e.target.value)}
-            placeholder="Player X Id"
+      <Row gutter={16}>
+        <Col xs={24} md={12}>
+          <Card title="Kreiraj" bordered>
+            <Space direction="vertical" style={{ width: '100%' }}>
+              <Input value={x} onChange={e=>setX(e.target.value)} placeholder="Player X Id" />
+              <Input value={o} onChange={e=>setO(e.target.value)} placeholder="Player O Id" />
+              <Button type="primary" onClick={()=>create({ playerXId: x, playerOId: o })} loading={loading}>
+                Kreiraj
+              </Button>
+            </Space>
+          </Card>
+        </Col>
+        <Col xs={24} md={12}>
+          <Card title="Join" bordered>
+            <Space direction="vertical" style={{ width: '100%' }}>
+              <Input value={gid} onChange={e=>setGid(e.target.value)} placeholder="Game Id" />
+              <Button onClick={()=>load(gid)} loading={loading}>
+                Join
+              </Button>
+            </Space>
+          </Card>
+        </Col>
+      </Row>
+
+      <Card>
+        <Space direction="vertical" style={{ width: '100%' }}>
+          <Space align="center">
+            <Text strong>X-UserId:</Text>
+            <Input style={{ maxWidth: 220 }} value={actingUserId} onChange={e=>setActing(e.target.value)} />
+            <Text type="secondary">Prvi potez igra X ({x}). Stavi X-UserId = {x} za prvi klik.</Text>
+          </Space>
+
+          <Divider />
+
+          <Space direction="vertical" size="small">
+            {state ? (
+              isInProgress(state.status)
+                ? <Text strong>Na potezu: {state.nextPlayer}</Text>
+                : <Alert type={state.status === 1 || state.status === 'XWon' ? 'success' :
+                               state.status === 2 || state.status === 'OWon' ? 'warning' : 'info'}
+                         message={statusText(state.status)} showIcon />
+            ) : <Text type="secondary">Nema aktivne igre</Text>}
+          </Space>
+
+          <Board
+            cells={state?.cells ?? empty9}
+            disabled={!state || !isInProgress(state.status) || loading}
+            onClickCell={(i)=>move(actingUserId, i)}
           />
-          <input
-            value={o}
-            onChange={(e) => setO(e.target.value)}
-            placeholder="Player O Id"
-          />
-          <button
-            onClick={() => create({ playerXId: x, playerOId: o })}
-            disabled={loading}
-          >
-            Kreiraj
-          </button>
-        </div>
-        <div>
-          <h3>Join</h3>
-          <input
-            value={gid}
-            onChange={(e) => setGid(e.target.value)}
-            placeholder="Game Id"
-          />
-          <button onClick={() => load(gid)} disabled={loading}>
-            Join
-          </button>
-        </div>
-      </div>
 
-      <div>
-        <label>X-UserId: </label>
-        <input
-          value={actingUserId}
-          onChange={(e) => setActing(e.target.value)}
-        />
-        <small style={{ marginLeft: 8, opacity: 0.7 }}>
-          Prvi potez igra player X (obično {x}). Postavi X-UserId = {x} za prvi
-          klik.
-        </small>
-      </div>
+          {state && (
+            <Text type="secondary">GameId: {state.gameId} · Verzija: {state.version}</Text>
+          )}
 
-      <div>
-        <p>
-          {state
-            ? isInProgress(state.status)
-              ? `Na potezu: ${state.nextPlayer}`
-              : statusText(state.status)
-            : 'Nema aktivne igre'}
-        </p>
-
-        <Board
-          cells={state?.cells ?? empty9}
-          disabled={!state || !isInProgress(state.status) || loading}
-          onClickCell={(i) => move(actingUserId, i)}
-        />
-
-        {state && (
-          <small>
-            GameId: {state.gameId} · Verzija: {state.version}
-          </small>
-        )}
-      </div>
-
-      {error && <p style={{ color: 'crimson' }}>{error}</p>}
-    </div>
+          {error && <Alert type="error" message={String(error)} showIcon />}
+        </Space>
+      </Card>
+    </Space>
   );
 }
