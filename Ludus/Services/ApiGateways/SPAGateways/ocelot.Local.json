@@ -1,0 +1,20 @@
+{
+    "Routes": [
+        {
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 5000
+                }
+            ]
+        },
+        {
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 5000
+                }
+            ]
+        }
+    ]
+}

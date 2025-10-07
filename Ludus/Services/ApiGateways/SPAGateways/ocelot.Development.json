@@ -1,0 +1,31 @@
+{
+    "Routes": [
+        {
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "xogameservice.api",
+                    "Port": 8080
+                }
+            ]
+        },
+        {
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "xogameservice.api",
+                    "Port": 8080
+                }
+            ]
+        },
+        {
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "xogameservice.api",
+                    "Port": 8080
+                }
+            ]
+        }
+    ],
+    "GlobalConfiguration": {
+        "BaseUrl": "http://ludusgateways:8080"
+    }
+}
