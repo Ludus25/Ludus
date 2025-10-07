@@ -7,3 +7,10 @@ services:
     build:
       context: .
       dockerfile: Services/XOGameService/XOGameService.API/Dockerfile
+
+  ludusgateways:
+    image: ${DOCKER_REGISTRY-}ludusgateways
+    build:
+      context: .
+      dockerfile: Services/ApiGateways/SPAGateways/Dockerfile
+
