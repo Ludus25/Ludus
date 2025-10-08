@@ -10,12 +10,18 @@ namespace MatchmakingService.Application.Commands
         private readonly IMatchRepository _repo;
         private readonly IEventPublisher _publisher;
         private readonly UserGrpcClient? _userClient;
+        private readonly GameGrpcClient? _gameClient;
 
-        public JoinCommandHandler(IMatchRepository repo, IEventPublisher publisher, UserGrpcClient? userClient = null)
+        public JoinCommandHandler(
+            IMatchRepository repo, 
+            IEventPublisher publisher, 
+            UserGrpcClient? userClient = null, 
+            GameGrpcClient? gameClient = null)
         {
             _repo = repo;
             _publisher = publisher;
             _userClient = userClient;
+            _gameClient = gameClient;
         }
 
         public async Task<string> HandleAsync(JoinCommand cmd)
@@ -47,16 +53,26 @@ namespace MatchmakingService.Application.Commands
             if (snapshot.Count >= 2)
             {
                 var players = snapshot.Take(2).ToList();
-                foreach (var p in players) _repo.RemoveFromQueue(p.PlayerId);
+                foreach (var p in players) 
+                    _repo.RemoveFromQueue(p.PlayerId);
 
                 var match = new Match(players);
                 _repo.AddMatch(match);
 
-                // publish event
+                // Try gRPC first
+                string? gameUrl = null;
+                if (_gameClient != null)
+                {
+                    var response = await _gameClient.StartGameAsync(match.MatchId, players.ToList());
+                    gameUrl = response?.GameServerUrl;
+                }
+
+                // Publish event to RabbitMQ (fallback or parallel notification)
                 _publisher.PublishMatchCreated(new
                 {
                     MatchId = match.MatchId,
-                    Players = match.Players.Select(p => new { 
+                    Players = match.Players.Select(p => new 
+                    { 
                         PlayerId = p.PlayerId, 
                         Rating = p.Rating 
                     }).ToArray(),
@@ -64,7 +80,10 @@ namespace MatchmakingService.Application.Commands
                 });
 
                 Console.WriteLine($"[EVENT] Match created: {match.MatchId} with players: {string.Join(", ", players.Select(p => $"{p.PlayerId}({p.Rating})"))}");
-                return $"Match created! MatchId: {match.MatchId}";
+
+                return gameUrl != null 
+                    ? $"Match created! Join at: {gameUrl}" 
+                    : $"Match created! MatchId: {match.MatchId}";
             }
 
             return "Player added to queue";

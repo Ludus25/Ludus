@@ -37,6 +37,12 @@ if (!string.IsNullOrEmpty(userGrpcAddr))
     builder.Services.AddSingleton(new UserGrpcClient(userGrpcAddr));
 }
 
+var gameGrpcAddr = builder.Configuration["GAME_GRPC_ADDRESS"];
+if (!string.IsNullOrEmpty(gameGrpcAddr))
+{
+    builder.Services.AddSingleton(new GameGrpcClient(gameGrpcAddr));
+}
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

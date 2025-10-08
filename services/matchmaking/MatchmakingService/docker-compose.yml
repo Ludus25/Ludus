@@ -1,17 +1,27 @@
-version: "3.9"
+
 services:
   matchmaking:
     build: ./services/matchmaking/MatchmakingService
     environment:
       - RABBIT_HOST=rabbitmq
       - ASPNETCORE_URLS=http://+:8080
+      - USER_GRPC_ADDRESS=https://user-service:5001
+      - GAME_GRPC_ADDRESS=https://game-service:5002
     ports:
       - "5002:8080"
     depends_on:
       - rabbitmq
+    networks:
+      - ludus-network
 
   rabbitmq:
     image: rabbitmq:3-management
     ports:
       - "5672:5672"
       - "15672:15672"
+    networks:
+      - ludus-network
+
+networks:
+  ludus-network:
+    driver: bridge
