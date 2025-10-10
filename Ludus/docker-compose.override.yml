@@ -2,6 +2,7 @@ services:
   xogamedb:
     container_name: xogamedb
     restart: always
+    image: redis:alpine
     ports:
       - "6379:6379"
 
@@ -10,7 +11,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
-      - "RedisCacheSettings:ConnectionString=xogamedb:6379" 
+      - "RedisCacheSettings:ConnectionString=xogamedb:6379"
     depends_on:
       - xogamedb
     ports:
@@ -20,12 +21,39 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
-      # - Jwt__Authority=http://auth-service:8080
-      # - Jwt__Audience=gateway
-      # - Jwt__RequireHttpsMetadata=false
     depends_on:
       - xogamedb
       - xogameservice.api
     ports:
       - "8010:8080"
 
+  matchmakingservice:
+    container_name: matchmakingservice
+    build:
+      context: .
+      dockerfile: Services/Matchmaking/MatchmakingService/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - RABBIT_HOST=rabbitmq
+      - USER_GRPC_ADDRESS=http://user-service:5001
+      - GAME_GRPC_ADDRESS=http://xogameservice.api:8080
+    depends_on:
+      - rabbitmq
+      - xogameservice.api
+    ports:
+      - "5002:8080"
+    networks:
+      - ludus-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - ludus-network
+
+networks:
+  ludus-network:
+    driver: bridge

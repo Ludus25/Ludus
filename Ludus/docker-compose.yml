@@ -14,3 +14,10 @@ services:
       context: .
       dockerfile: Services/ApiGateways/SPAGateways/Dockerfile
 
+
+  matchmakingservice:
+    image: ${DOCKER_REGISTRY-}matchmakingservice
+    build:
+      context: .
+      dockerfile: Services/Matchmaking/MatchmakingService/Dockerfile
+
