@@ -39,10 +39,7 @@ services:
         condition: service_healthy
     ports:
       - "7000:8080"
-
-volumes:
-  mssql_data:
-
+  
   ludusgateways:
     image: ${DOCKER_REGISTRY-}ludusgateways
     build:
@@ -55,4 +52,9 @@ volumes:
     build:
       context: .
       dockerfile: Services/Matchmaking/MatchmakingService/Dockerfile
+
+volumes:
+  mssql_data:
+
+
 
