@@ -1,4 +1,16 @@
+
 services:
+  sqlserver:
+    container_name: ludus-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=LudusBaza123!
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql/data
+    user: root
+
   xogamedb:
     container_name: xogamedb
     restart: always
@@ -16,6 +28,18 @@ services:
       - xogamedb
     ports:
       - "8001:8080"
+
+  authenticationservice:
+    container_name: ludus-authenticationservice
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=Ludus;User Id=sa;Password=LudusBaza123!;TrustServerCertificate=True;
+    depends_on:
+      - sqlserver
+    ports:
+      - "7000:8080"
+
 
   ludusgateways:
     environment:
