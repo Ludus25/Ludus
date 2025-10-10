@@ -8,7 +8,7 @@ export function useGame() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const hub = useMemo(() => buildHub('/gamehub'), []) // 👈 koristi Upstream iz Ocelot-a
+  const hub = useMemo(() => buildHub('/gamehub'), []) 
   useEffect(() => () => { hub.stop().catch(() => {}) }, [hub])
 
   const attach = useCallback(() => {
