@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
 
 namespace AuthenticationService.Entities
 {
@@ -8,7 +9,6 @@ namespace AuthenticationService.Entities
             public string name { get; set; }
             public string surname { get; set; }
 
-            public string Roles { get; set; }  
 
 
 

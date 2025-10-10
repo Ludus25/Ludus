@@ -47,7 +47,6 @@ namespace AuthenticationService.Controllers
                 UserName = model.Email,
                 Email = model.Email,
                 mlb = model.Mlb,
-                Roles = "User",
                 name = model.Name,
                 surname = model.Surname,
                 TwoFactorEnabled = true

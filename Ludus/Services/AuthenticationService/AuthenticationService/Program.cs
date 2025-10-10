@@ -16,7 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+//builder.Services.AddControllers();
 
 
 builder.Services.AddEndpointsApiExplorer();
@@ -122,7 +122,17 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 // Registruj servis za 2FA
 builder.Services.AddScoped<ITwoFactorService, TwoFactorService>();
 
-
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions => sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorNumbersToAdd: null
+        )
+    )
+);
+builder.Services.AddControllers();
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
@@ -133,19 +143,14 @@ if (app.Environment.IsDevelopment())
 
 using (var scope = app.Services.CreateScope())
 {
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var services = scope.ServiceProvider;
+
+    var db = services.GetRequiredService<AppDbContext>();
+    db.Database.Migrate(); 
+
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
     await SeedRoles(roleManager);
 }
-
-
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
 static async Task SeedRoles(RoleManager<IdentityRole> roleManager)
 
 {
@@ -155,3 +160,19 @@ static async Task SeedRoles(RoleManager<IdentityRole> roleManager)
     if (!await roleManager.RoleExistsAsync("User"))
         await roleManager.CreateAsync(new IdentityRole("User"));
 }
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var conn = db.Database.GetDbConnection();
+    Console.WriteLine($"[EF DB CHECK] DataSource={conn.DataSource}; Database={conn.Database}");
+}
+
+app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
