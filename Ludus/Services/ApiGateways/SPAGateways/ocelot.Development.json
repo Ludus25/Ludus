@@ -1,31 +1,57 @@
 {
     "Routes": [
         {
+            "DownstreamPathTemplate": "/api/v1/xo-game",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
                     "Host": "xogameservice.api",
                     "Port": 8080
                 }
-            ]
+            ],
+            "UpstreamPathTemplate": "/xo-game",
+            "UpstreamHttpMethod": [ "POST" ]
         },
         {
+            "DownstreamPathTemplate": "/api/v1/xo-game/{everything}",
+            "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
                     "Host": "xogameservice.api",
                     "Port": 8080
                 }
-            ]
+            ],
+            "UpstreamPathTemplate": "/xo-game/{everything}",
+            "UpstreamHttpMethod": [ "GET", "POST", "PUT" ]
         },
         {
+            "DownstreamPathTemplate": "/gamehub",
+            "DownstreamScheme": "ws",
             "DownstreamHostAndPorts": [
                 {
                     "Host": "xogameservice.api",
                     "Port": 8080
                 }
-            ]
+            ],
+            "UpstreamPathTemplate": "/ws/gamehub",
+            "UpstreamHttpMethod": [ "GET" ]
+        },
+        {
+            "DownstreamPathTemplate": "/gamehub/negotiate",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "xogameservice.api",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/ws/gamehub/negotiate",
+            "UpstreamHttpMethod": [ "POST" ]
         }
+
     ],
     "GlobalConfiguration": {
-        "BaseUrl": "http://ludusgateways:8080"
+        "BaseUrl": "http://ludusgateways:8080",
+        "RequestIdKey": "X-Request-Id"
     }
 }
