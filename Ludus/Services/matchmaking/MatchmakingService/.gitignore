@@ -1,0 +1,38 @@
+# Build results
+bin/
+obj/
+out/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio
+.vs/
+*.vscode/
+
+# Rider
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Runtime data
+*.pid
+*.seed
+
+# Environment variables
+.env
+.env.local
+
+# Temporary files
+*.tmp
+*.temp
