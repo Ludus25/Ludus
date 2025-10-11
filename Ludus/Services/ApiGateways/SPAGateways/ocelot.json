@@ -71,6 +71,30 @@
                 "AuthenticationProviderKey": "LudusAuth",
                 "AllowedScopes": []
             }
+        },
+        {
+            "DownstreamPathTemplate": "/api/matchmaking/join",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "matchmakingservice",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/matchmaking/join",
+            "UpstreamHttpMethod": [ "POST" ]
+        },
+        {
+            "DownstreamPathTemplate": "/api/matchmaking/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "matchmakingservice",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/matchmaking/{everything}",
+            "UpstreamHttpMethod": [ "GET", "POST" ]
         }
     ],
     "GlobalConfiguration": {

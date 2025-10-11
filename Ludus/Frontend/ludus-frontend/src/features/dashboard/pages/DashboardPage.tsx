@@ -18,6 +18,10 @@ export default function DashboardPage() {
       >
         Start Game
       </button>
+
+      <button onClick={() => navigate("/matchmaking")}>
+        Find Match
+      </button>
     </div>
   );
 }

@@ -51,7 +51,7 @@ services:
     image: ${DOCKER_REGISTRY-}matchmakingservice
     build:
       context: .
-      dockerfile: Services/Matchmaking/MatchmakingService/Dockerfile
+      dockerfile: Services/matchmaking/MatchmakingService/Dockerfile
 
 volumes:
   mssql_data:
