@@ -5,40 +5,76 @@
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 5000
+                    "Host": "xogameservice.api",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/xo-game",
-            "UpstreamHttpMethod": [ "POST" ]
+            "UpstreamHttpMethod": [ "POST" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "LudusAuth",
+                "AllowedScopes": []
+            },
+            "AddHeadersToRequest": {
+                "X-UserId": "Claims[sub]",
+                "X-UserRole": "Claims[http://schemas.microsoft.com/ws/2008/06/identity/claims/role]"
+            }
         },
         {
             "DownstreamPathTemplate": "/api/v1/xo-game/{everything}",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 5000
+                    "Host": "xogameservice.api",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/xo-game/{everything}",
-            "UpstreamHttpMethod": [ "GET", "POST", "PUT" ]
+            "UpstreamHttpMethod": [ "GET", "POST", "PUT" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "LudusAuth",
+                "AllowedScopes": []
+            },
+            "AddHeadersToRequest": {
+                "X-UserId": "Claims[sub]",
+                "X-UserRole": "Claims[http://schemas.microsoft.com/ws/2008/06/identity/claims/role]"
+            }
         },
         {
             "DownstreamPathTemplate": "/gamehub",
             "DownstreamScheme": "ws",
             "DownstreamHostAndPorts": [
                 {
-                    "Host": "localhost",
-                    "Port": 5000
+                    "Host": "xogameservice.api",
+                    "Port": 8080
                 }
             ],
             "UpstreamPathTemplate": "/ws/gamehub",
-            "UpstreamHttpMethod": [ "GET" ]
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "LudusAuth",
+                "AllowedScopes": []
+            }
+        },
+        {
+            "DownstreamPathTemplate": "/gamehub/negotiate",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "xogameservice.api",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/ws/gamehub/negotiate",
+            "UpstreamHttpMethod": [ "POST" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "LudusAuth",
+                "AllowedScopes": []
+            }
         }
     ],
     "GlobalConfiguration": {
-        "BaseUrl": "http://localhost:8080",
+        "BaseUrl": "http://ludusgateways:8080",
         "RequestIdKey": "X-Request-Id"
     }
 }
