@@ -3,11 +3,11 @@ using Common.Entities;
 
 namespace Services
 {
-    public class GameHistoryService : IGameHistoryService
+    public class GameHistoryServiceImpl : IGameHistoryService
     {
         private readonly IGameHistoryRepository _repository;
 
-        public GameHistoryService(IGameHistoryRepository repository)
+        public GameHistoryServiceImpl(IGameHistoryRepository repository)
         {
             _repository = repository;
         }
