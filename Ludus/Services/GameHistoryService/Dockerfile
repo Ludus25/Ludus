@@ -13,6 +13,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Services/GameHistoryService/GameHistoryService.csproj", "Services/GameHistoryService/"]
+COPY ["Services/Common/Common.csproj", "Services/Common/"]
 RUN dotnet restore "./Services/GameHistoryService/GameHistoryService.csproj"
 COPY . .
 WORKDIR "/src/Services/GameHistoryService"
