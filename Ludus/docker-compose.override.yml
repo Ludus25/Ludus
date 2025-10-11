@@ -45,6 +45,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
+      - Jwt__Key=fWZJY3tYTGdJWE1uZk1uTlRQd1dQemk0RXBnY0J3N1pmdG9VdkxORXRJWWVzTmxTYVJSQ0xYaz0=
+      - Jwt__Issuer=http://authenticationservice:8080
+      - Jwt__Audience=http://ludusgateways:8080
     depends_on:
       - xogamedb
       - xogameservice.api

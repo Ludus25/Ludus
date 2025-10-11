@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 
@@ -11,64 +12,62 @@ builder.Configuration
     .AddJsonFile($"ocelot.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
     .AddEnvironmentVariables();
 
-//builder.Services
-//    .AddAuthentication(options =>
-//    {
-//        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-//        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-//    })
-//    .AddJwtBearer("Bearer", options =>
-//    {
-//        options.Authority = builder.Configuration["Jwt:Authority"];
-//        options.Audience = builder.Configuration["Jwt:Audience"];
-//        options.RequireHttpsMetadata = bool.TryParse(builder.Configuration["Jwt:RequireHttpsMetadata"], out var https) && https;
+builder.Services.AddAuthentication()
+    .AddJwtBearer("LudusAuth", options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
 
-//        options.TokenValidationParameters = new TokenValidationParameters
-//        {
-//            ValidateIssuer = true,
-//            ValidateAudience = true,
-//            ValidateLifetime = true,
-//            ValidateIssuerSigningKey = true
-//        };
-//        options.Events = new JwtBearerEvents
-//        {
-//            OnMessageReceived = ctx =>
-//            {
-//                var accessToken = ctx.Request.Query["access_token"];
-//                var path = ctx.HttpContext.Request.Path;
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
 
-//                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/ws"))
-//                {
-//                    ctx.Token = accessToken;
-//                }
-//                return Task.CompletedTask;
-//            }
-//        };
-//    });
+                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/ws"))
+                {
+                    context.Token = accessToken;
+                }
 
-//builder.Services.AddAuthorization();
+                return Task.CompletedTask;
+            }
+        };
+    });
 
 const string CorsPolicy = "AllowAll";
-builder.Services.AddCors(o => o.AddPolicy(CorsPolicy, p =>
-    p.SetIsOriginAllowed(_ => true)
-     .AllowAnyHeader()
-     .AllowAnyMethod()
-     .AllowCredentials()));
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(CorsPolicy, policy =>
+        policy.SetIsOriginAllowed(_ => true)
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials());
+});
 
 builder.Services.AddOcelot(builder.Configuration);
 
 var app = builder.Build();
 
 app.MapGet("/", () => "API Gateway up & running");
-app.MapGet("/health", () => Results.Ok(new { status = "ok", env = app.Environment.EnvironmentName }));
+app.MapGet("/health", () => Results.Ok(new
+{
+    status = "ok",
+    env = app.Environment.EnvironmentName
+}));
 
 app.UseCors(CorsPolicy);
-
+app.UseAuthentication();
 app.UseWebSockets();
-
-//app.UseAuthentication();
-//app.UseAuthorization();
 
 await app.UseOcelot();
 
