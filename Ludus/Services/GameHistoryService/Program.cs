@@ -3,11 +3,11 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
-using Messaging;
 using Data;
 using Interfaces;
-using Services;
 using Consumers;
+using MassTransit;
+using Services;
 
 internal class Program
 {
@@ -16,7 +16,36 @@ internal class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // RabbitMQ configuration
-        builder.Services.Configure<RabbitMQSettings>(builder.Configuration.GetSection("RabbitMQ"));
+        builder.Services.AddMassTransit(x =>
+        {
+            x.AddConsumer<GameEndedEventConsumer>();
+            x.AddConsumer<ChatLogEventConsumer>();
+
+            x.UsingRabbitMq((context, cfg) =>
+            {
+                cfg.Host(builder.Configuration["RabbitMQ:HostAddress"]);
+
+                string gameEndedQueueName = builder.Configuration["RabbitMQ:GameEndedeQueue"];
+                string chatLogQueueName = builder.Configuration["RabbitMQ:ChatLogQueue"];
+
+                cfg.ReceiveEndpoint(gameEndedQueueName, e =>
+                {
+                    e.ConfigureConsumer<GameEndedEventConsumer>(context);
+                    e.SetQueueArgument("x-dead-letter-exchange", $"{gameEndedQueueName}-dlx");
+                    e.SetQueueArgument("x-dead-letter-routing-key", $"{gameEndedQueueName}.dlq");
+                });
+
+                cfg.ReceiveEndpoint(chatLogQueueName, e =>
+                {
+                    e.ConfigureConsumer<ChatLogEventConsumer>(context);
+                    e.SetQueueArgument("x-dead-letter-exchange", $"{chatLogQueueName}-dlx");
+                    e.SetQueueArgument("x-dead-letter-routing-key", $"{chatLogQueueName}.dlq");
+                });
+
+                cfg.ReceiveEndpoint($"{gameEndedQueueName}.dlq", e => e.Bind($"{gameEndedQueueName}-dlx", x => x.RoutingKey = $"{gameEndedQueueName}.dlq"));
+                cfg.ReceiveEndpoint($"{chatLogQueueName}.dlq", e => e.Bind($"{chatLogQueueName}-dlx", x => x.RoutingKey = $"{chatLogQueueName}.dlq"));
+            });
+        });
 
         // JWT settings
         var jwtSection = builder.Configuration.GetSection("Jwt");
@@ -55,11 +84,7 @@ internal class Program
 
         // Add services to the container.
         builder.Services.AddScoped<IGameHistoryRepository, GameHistoryRepository>();
-        builder.Services.AddScoped<IGameHistoryService, GameHistoryService>();
-
-        // Hosted consumers for RabbitMQ
-        builder.Services.AddHostedService<GameEndedEventConsumer>();
-        builder.Services.AddHostedService<ChatLogEventConsumer>();
+        builder.Services.AddScoped<IGameHistoryService, GameHistoryServiceImpl>();
 
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
@@ -83,11 +108,11 @@ internal class Program
 
         app.MapControllers();
 
-        using (var scope = app.Services.CreateScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<GameHistoryDbContext>();
-            db.Database.Migrate();
-        }
+        //using (var scope = app.Services.CreateScope())
+        //{
+        //    var db = scope.ServiceProvider.GetRequiredService<GameHistoryDbContext>();
+        //    db.Database.Migrate();
+        //}
 
         app.Run();
     }
