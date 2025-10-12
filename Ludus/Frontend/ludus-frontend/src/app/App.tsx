@@ -1,8 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import GamePage from "../features/game/pages/GamePage";
 import DashboardPage from "../features/dashboard/pages/DashboardPage";
-import MatchmakingPage from "../features/matchmaking/pages/MatchmakingPage"
+import MatchmakingPage from "../features/matchmaking/pages/MatchmakingPage";
 
+import AuthPage from "../features/authentication/pages/authPage"; 
 
 
 export default function App() {
@@ -18,10 +19,16 @@ export default function App() {
         <h1>Ludus Frontend</h1>
 
         <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" />} />
+         
+          <Route path="/" element={<Navigate to="/auth" />} />
+
+          <Route path="/auth" element={<AuthPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/game" element={<GamePage />} />
           <Route path="/matchmaking" element={<MatchmakingPage />} />
+
+        
+          <Route path="*" element={<Navigate to="/auth" />} />
         </Routes>
       </div>
     </BrowserRouter>
