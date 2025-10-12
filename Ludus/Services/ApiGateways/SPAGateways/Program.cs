@@ -12,7 +12,7 @@ builder.Configuration
     .AddJsonFile($"ocelot.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
     .AddEnvironmentVariables();
 
-builder.Services.AddAuthentication()
+builder.Services.AddAuthentication("LudusAuth")
     .AddJwtBearer("LudusAuth", options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
@@ -68,6 +68,68 @@ app.MapGet("/health", () => Results.Ok(new
 app.UseCors(CorsPolicy);
 app.UseAuthentication();
 app.UseWebSockets();
+
+app.Use(async (context, next) =>
+{
+    if (context.User?.Identity?.IsAuthenticated == true)
+    {
+        Console.WriteLine("[GATEWAY] --- Claims after Authentication (Manual Header Injection) ---");
+        string userId = null;
+        string userRole = null;
+
+        foreach (var claim in context.User.Claims)
+        {
+            Console.WriteLine($"[GATEWAY] Claim: {claim.Type} = {claim.Value}");
+            if (claim.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")
+            {
+                userId = claim.Value;
+            }
+            if (claim.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")
+            {
+                userRole = claim.Value;
+            }
+        }
+        Console.WriteLine("[GATEWAY] -------------------------------------------------------------");
+
+        if (!string.IsNullOrEmpty(userId))
+        {
+            context.Request.Headers.TryAdd("X-UserId", userId);
+            Console.WriteLine($"[GATEWAY] Manually injected X-UserId: {userId}");
+        }
+        if (!string.IsNullOrEmpty(userRole))
+        {
+            context.Request.Headers.TryAdd("X-UserRole", userRole);
+            Console.WriteLine($"[GATEWAY] Manually injected X-UserRole: {userRole}");
+        }
+        context.Request.Headers.TryAdd("X-Debug-Manual", "ManualInjectWorks");
+        Console.WriteLine("[GATEWAY] Manually injected X-Debug-Manual: ManualInjectWorks");
+
+    }
+    else
+    {
+        Console.WriteLine("[GATEWAY] Custom Middleware: User not authenticated at this point (before Ocelot).");
+    }
+
+    await next();
+});
+
+app.Use(async (context, next) =>
+{
+    if (context.User?.Identity?.IsAuthenticated == true)
+    {
+        Console.WriteLine("[GATEWAY] --- Claims after Authentication ---");
+        foreach (var claim in context.User.Claims)
+        {
+            Console.WriteLine($"[GATEWAY] Claim: {claim.Type} = {claim.Value}");
+        }
+        Console.WriteLine("[GATEWAY] ---------------------------------");
+    }
+    else
+    {
+        Console.WriteLine("[GATEWAY] Custom Middleware: User not authenticated at this point.");
+    }
+    await next();
+});
 
 await app.UseOcelot();
 

@@ -10,7 +10,11 @@
                 }
             ],
             "UpstreamPathTemplate": "/xo-game",
-            "UpstreamHttpMethod": [ "POST" ]
+            "UpstreamHttpMethod": [ "POST" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "LudusAuth",
+                "AllowedScopes": []
+            }
         },
         {
             "DownstreamPathTemplate": "/api/v1/xo-game/{everything}",
@@ -22,7 +26,11 @@
                 }
             ],
             "UpstreamPathTemplate": "/xo-game/{everything}",
-            "UpstreamHttpMethod": [ "GET", "POST", "PUT" ]
+            "UpstreamHttpMethod": [ "GET", "POST", "PUT" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "LudusAuth",
+                "AllowedScopes": []
+            }
         },
         {
             "DownstreamPathTemplate": "/gamehub",
@@ -34,7 +42,11 @@
                 }
             ],
             "UpstreamPathTemplate": "/ws/gamehub",
-            "UpstreamHttpMethod": [ "GET" ]
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "LudusAuth",
+                "AllowedScopes": []
+            }
         },
         {
             "DownstreamPathTemplate": "/gamehub/negotiate",
@@ -46,9 +58,12 @@
                 }
             ],
             "UpstreamPathTemplate": "/ws/gamehub/negotiate",
-            "UpstreamHttpMethod": [ "POST" ]
+            "UpstreamHttpMethod": [ "POST" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "LudusAuth",
+                "AllowedScopes": []
+            }
         }
-
     ],
     "GlobalConfiguration": {
         "BaseUrl": "http://ludusgateways:8080",
