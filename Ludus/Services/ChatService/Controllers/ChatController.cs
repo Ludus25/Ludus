@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using ChatService.Entities;
 using ChatService.Services;
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ChatService.Controllers
 {
@@ -22,24 +24,16 @@ namespace ChatService.Controllers
             return Ok(new Message
             {
                 Sender = "System",
-                Text = "Chat service is running",
-                Timestamp = DateTime.UtcNow
+                Content = "Chat service is running", // promenjeno sa Text
+                SentAt = DateTime.UtcNow             // promenjeno sa Timestamp
             });
         }
 
         [HttpGet("messages")]
-        public ActionResult<List<Message>> GetMessages()
+        public async Task<ActionResult<List<Message>>> GetMessages()
         {
-            var messages = _messageService.GetMessages();
+            var messages = await _messageService.GetMessagesAsync();
             return Ok(messages);
-        }
-
-        // dodala sad
-        [HttpPost("send")]
-        public IActionResult SendMessage([FromBody] Message message)
-        {
-            _messageService.AddMessage(message);
-            return Ok("Message sent successfully");
         }
     }
 }

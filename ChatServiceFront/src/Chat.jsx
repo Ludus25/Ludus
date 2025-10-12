@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import * as signalR from "@microsoft/signalr";
-import axios from "axios";
 import {
   Box,
   Button,
@@ -17,51 +16,57 @@ const Chat = () => {
   const [usernameInput, setUsernameInput] = useState("");
   const [user, setUser] = useState("");
   const [message, setMessage] = useState("");
+  const [showLoadOlder, setShowLoadOlder] = useState(true);
   const chatEndRef = useRef(null);
 
-  const API_URL = "https://localhost:5001/api/chat";
-  const HUB_URL = "https://localhost:5001/chathub";
+  const HUB_URL = "http://localhost:5000/chathub";
 
   useEffect(() => {
     if (!user) return;
 
     const connect = new signalR.HubConnectionBuilder()
-      .withUrl(`${HUB_URL}?user=${encodeURIComponent(user)}`)
+      .withUrl(`${HUB_URL}?user=${encodeURIComponent(user)}`, {
+        skipNegotiation: false,
+        transport: signalR.HttpTransportType.WebSockets,
+      })
       .withAutomaticReconnect()
       .build();
 
+    // Receive a new message
     connect.on("ReceiveMessage", (msg) => {
       setMessages((prev) =>
-        [...prev, msg].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+        [...prev, msg].sort((a, b) => new Date(a.sentAt) - new Date(b.sentAt))
       );
     });
 
+    // Update online users list
     connect.on("UpdateUserList", (users) => {
       setOnlineUsers(users);
+    });
+
+    // Load older messages
+    connect.on("LoadOlderMessages", (msgs) => {
+      if (msgs.length === 0) {
+        setShowLoadOlder(false); // nestane dugme ako nema više poruka
+        return;
+      }
+
+      setMessages((prev) =>
+        [...msgs, ...prev].sort((a, b) => new Date(a.sentAt) - new Date(b.sentAt))
+      );
+    });
+
+    connect.on("NoMoreMessages", () => {
+      setShowLoadOlder(false);
     });
 
     connect
       .start()
       .then(() => setConnection(connect))
-      .catch((err) => console.error("SignalR error:", err));
+      .catch((err) => console.error("SignalR connection failed:", err));
 
     return () => connect.stop();
   }, [user]);
-
-  useEffect(() => {
-    axios
-      .get(`${API_URL}/messages`) // koristi pravi endpoint
-      .then((res) =>
-        setMessages(
-          res.data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
-        )
-      )
-      .catch((err) => console.error("Error fetching messages:", err));
-  }, []);
-
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
 
   const handleLogin = () => {
     if (usernameInput.trim()) setUser(usernameInput.trim());
@@ -77,6 +82,23 @@ const Chat = () => {
       }
     }
   };
+
+  const loadOlderMessages = async () => {
+    if (!connection) return;
+
+    const earliestTimestamp =
+      messages.length > 0 ? new Date(messages[0].sentAt).toISOString() : null;
+
+    try {
+      await connection.invoke("LoadOlderMessages", 20, earliestTimestamp);
+    } catch (err) {
+      console.error("Error loading older messages:", err);
+    }
+  };
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   if (!user) {
     return (
@@ -114,7 +136,7 @@ const Chat = () => {
 
   return (
     <Box display="flex" height="100vh" sx={{ bgcolor: "grey.100" }}>
-      {/* Sidebar Online Users */}
+      {/* Sidebar */}
       <Box
         width={250}
         p={2}
@@ -159,17 +181,19 @@ const Chat = () => {
         </Stack>
       </Box>
 
-      {/* Chat Area */}
+      {/* Chat area */}
       <Box flex={1} display="flex" flexDirection="column">
+        {/* Older messages button */}
+        {showLoadOlder && (
+          <Box p={1} textAlign="center">
+            <Button variant="outlined" size="small" onClick={loadOlderMessages}>
+              Load older messages
+            </Button>
+          </Box>
+        )}
+
         {/* Messages */}
-        <Box
-          flex={1}
-          overflow="auto"
-          p={2}
-          sx={{
-            background: "linear-gradient(to bottom, #f0f4ff, #e0e7ff)",
-          }}
-        >
+        <Box flex={1} overflow="auto" p={2}>
           <Stack spacing={2}>
             {messages.map((m, idx) => {
               const isOwn = m.sender === user;
@@ -184,41 +208,21 @@ const Chat = () => {
                       px: 3,
                       py: 1.5,
                       maxWidth: "70%",
-                      bgcolor: isOwn ? "primary.main" : "grey.200",
+                      bgcolor: isOwn ? "#1976d2" : "#e0e0e0",
                       color: isOwn ? "white" : "black",
                       borderRadius: 3,
-                      borderTopRightRadius: isOwn ? 0 : 3,
-                      borderTopLeftRadius: isOwn ? 3 : 0,
-                      position: "relative",
-                      boxShadow: 2,
-                      "&::after": {
-                        content: '""',
-                        position: "absolute",
-                        width: 0,
-                        height: 0,
-                        borderStyle: "solid",
-                        borderWidth: isOwn
-                          ? "10px 0 10px 10px"
-                          : "10px 10px 10px 0",
-                        borderColor: isOwn
-                          ? `transparent transparent transparent ${"#3f51b5"}`
-                          : `transparent ${"#e0e0e0"} transparent transparent`,
-                        top: 12,
-                        right: isOwn ? -10 : "auto",
-                        left: isOwn ? "auto" : -10,
-                      },
                     }}
                   >
                     <Typography variant="subtitle2" fontWeight="bold">
                       {m.sender}
                     </Typography>
-                    <Typography>{m.text}</Typography>
+                    <Typography>{m.content}</Typography>
                     <Typography
                       variant="caption"
                       display="block"
                       textAlign="right"
                     >
-                      {new Date(m.timestamp).toLocaleTimeString()}
+                      {new Date(m.sentAt).toLocaleTimeString()}
                     </Typography>
                   </Paper>
                 </Box>

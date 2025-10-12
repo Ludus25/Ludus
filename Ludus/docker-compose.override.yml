@@ -2,15 +2,29 @@ services:
   xogamedb:
     container_name: xogamedb
     restart: always
+    image: redis:alpine
     ports:
       - "6379:6379"
+
+  postgres-db:
+    container_name: postgres-db
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: userChat
+      POSTGRES_PASSWORD: passChat
+      POSTGRES_DB: chatdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
 
   xogameservice.api:
     container_name: xogame.api
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
-      - "RedisCacheSettings:ConnectionString=xogamedb:6379" 
+      - "RedisCacheSettings:ConnectionString=xogamedb:6379"
     depends_on:
       - xogamedb
     ports:
@@ -29,3 +43,16 @@ services:
     ports:
       - "8010:8080"
 
+  chatservice:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ConnectionStrings__DefaultConnection=Host=postgres-db;Port=5432;Database=chatdb;Username=userChat;Password=passChat
+    depends_on:
+      - postgres-db
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+
+volumes:
+  postgres-data:
