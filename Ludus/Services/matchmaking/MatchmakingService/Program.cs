@@ -1,6 +1,7 @@
 using MatchmakingService.Application.Commands;
 using MatchmakingService.Application.Services;
 using MatchmakingService.Infrastructure.Grpc;
+using MatchmakingService.Hubs; // DODATO
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -11,6 +12,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// SignalR
+builder.Services.AddSignalR(); // DODATO
 
 // DI for repository and event publisher
 builder.Services.AddSingleton<IMatchRepository, InMemoryMatchRepository>();
@@ -54,6 +58,7 @@ if (app.Environment.IsDevelopment())
 // app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<MatchmakingHub>("/matchmakingHub"); // DODATO
 app.Run();
 
 // --- small ConsoleEventPublisher fallback (in same file or separate)

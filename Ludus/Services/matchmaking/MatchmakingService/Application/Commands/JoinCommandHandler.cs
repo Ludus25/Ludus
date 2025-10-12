@@ -1,6 +1,8 @@
 using MatchmakingService.Entities;
 using MatchmakingService.Application.Services;
 using MatchmakingService.Infrastructure.Grpc;
+using MatchmakingService.Hubs; // DODATO
+using Microsoft.AspNetCore.SignalR; // DODATO
 using System.Linq;
 
 namespace MatchmakingService.Application.Commands
@@ -11,17 +13,20 @@ namespace MatchmakingService.Application.Commands
         private readonly IEventPublisher _publisher;
         private readonly UserGrpcClient? _userClient;
         private readonly GameGrpcClient? _gameClient;
+        private readonly IHubContext<MatchmakingHub>? _hubContext; // DODATO
 
         public JoinCommandHandler(
             IMatchRepository repo, 
             IEventPublisher publisher, 
             UserGrpcClient? userClient = null, 
-            GameGrpcClient? gameClient = null)
+            GameGrpcClient? gameClient = null,
+            IHubContext<MatchmakingHub>? hubContext = null) // DODATO
         {
             _repo = repo;
             _publisher = publisher;
             _userClient = userClient;
             _gameClient = gameClient;
+            _hubContext = hubContext; // DODATO
         }
 
         public async Task<string> HandleAsync(JoinCommand cmd)
@@ -65,6 +70,25 @@ namespace MatchmakingService.Application.Commands
                 {
                     var response = await _gameClient.StartGameAsync(match.MatchId, players.ToList());
                     gameUrl = response?.GameServerUrl;
+                }
+
+                // DODATO: Notifikuj OBA igrača preko SignalR
+                if (_hubContext != null)
+                {
+                    foreach (var p in players)
+                    {
+                        var connectionId = MatchmakingHub.GetConnectionId(p.PlayerId);
+                        if (connectionId != null)
+                        {
+                            await _hubContext.Clients.Client(connectionId).SendAsync("MatchFound", new
+                            {
+                                MatchId = match.MatchId,
+                                GameUrl = gameUrl,
+                                Players = players.Select(pl => pl.PlayerId).ToArray()
+                            });
+                            Console.WriteLine($"[SIGNALR] Notified player {p.PlayerId}");
+                        }
+                    }
                 }
 
                 // Publish event to RabbitMQ (fallback or parallel notification)

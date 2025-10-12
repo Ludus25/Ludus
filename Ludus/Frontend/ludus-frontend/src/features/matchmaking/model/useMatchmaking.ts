@@ -1,52 +1,78 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import type { NavigateFunction } from 'react-router-dom'
+import * as signalR from '@microsoft/signalr'
 import { matchmakingApi } from '../api/matchmakingApi'
 import type { JoinMatchRequest, MatchStatus } from './types'
 
-export function useMatchmaking() {
+export function useMatchmaking(navigate?: NavigateFunction) {
   const [status, setStatus] = useState<MatchStatus | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [polling, setPolling] = useState(false)
 
-  // Polling - pita server svakih 2 sekunde
+  // SignalR connection
+  const hub = useMemo(() => 
+    new signalR.HubConnectionBuilder()
+      .withUrl('/ws/matchmakingHub')
+      .withAutomaticReconnect()
+      .build()
+  , [])
+
   useEffect(() => {
-    if (!polling || !status || status.status !== 'searching') return
+    // Start connection
+    hub.start()
+      .then(() => {
+        console.log('[SIGNALR] Connected')
+      })
+      .catch(err => {
+        console.error('[SIGNALR] Connection error:', err)
+      })
 
-    const interval = setInterval(async () => {
-      try {
-        const playerIdFromStatus = (status as any).playerId // Čuvajte playerId
-        if (!playerIdFromStatus) return
-        
-        const newStatus = await matchmakingApi.getStatus(playerIdFromStatus)
-        setStatus(newStatus)
-        
-        if (newStatus.status === 'matched') {
-          setPolling(false)
-          console.log('MATCH FOUND!', newStatus.matchId)
-        }
-      } catch (e) {
-        console.error('Polling error:', e)
+    // Listen for MatchFound event
+    hub.on('MatchFound', (data: any) => {
+      console.log('[SIGNALR] Match found!', data)
+      const newStatus = {
+        status: 'matched' as const,
+        matchId: data.matchId,
+        players: data.players
       }
-    }, 2000)
+      setStatus(newStatus)
+      
+      // Navigate automatically
+      if (navigate && data.matchId) {
+        setTimeout(() => {
+          console.log('[SIGNALR] Auto-navigating to game')
+          navigate(`/game?matchId=${data.matchId}`)
+        }, 2000)
+      }
+    })
 
-    return () => clearInterval(interval)
-  }, [polling, status])
+    return () => {
+      hub.stop()
+    }
+  }, [hub, navigate])
 
   const join = useCallback(async (dto: JoinMatchRequest) => {
     setError(null)
     setLoading(true)
     try {
+      // Ensure connected
+      if (hub.state !== signalR.HubConnectionState.Connected) {
+        console.log('[SIGNALR] Connecting...')
+        await hub.start()
+      }
+
+      await hub.invoke('RegisterPlayer', dto.playerId)
+      console.log('[SIGNALR] Registered player:', dto.playerId)
+
       await matchmakingApi.join(dto)
-      
-      // Nakon join-a, startuj polling
-      setStatus({ status: 'searching', playerId: dto.playerId } as any)
-      setPolling(true)
+      setStatus({ status: 'searching' } as any)
     } catch (e: any) {
+      console.error('[SIGNALR] Error:', e)
       setError(e?.response?.data ?? e?.message ?? 'Join failed')
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [hub])
 
   const checkStatus = useCallback(async (playerId: string) => {
     setError(null)
@@ -61,5 +87,5 @@ export function useMatchmaking() {
     }
   }, [])
 
-  return { status, loading, error, join, checkStatus, polling }
+  return { status, loading, error, join, checkStatus }
 }
