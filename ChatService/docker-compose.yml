@@ -1,9 +1,0 @@
-version: '3.8'
-services:
-  chatservice:
-    build: .
-    ports:
-      - "5000:80"
-      - "5001:443"
-    environment:
-      DOTNET_ENVIRONMENT: Development

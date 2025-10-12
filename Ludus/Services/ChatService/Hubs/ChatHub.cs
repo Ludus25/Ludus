@@ -21,12 +21,15 @@ namespace ChatService.Hubs
         public override async Task OnConnectedAsync()
         {
             var user = Context.GetHttpContext()?.Request.Query["user"].ToString();
+            var gameId = Context.GetHttpContext()?.Request.Query["gameId"].ToString();
 
-            if (!string.IsNullOrEmpty(user))
+            if (!string.IsNullOrEmpty(user) && !string.IsNullOrEmpty(gameId))
             {
-                _userService.AddUser(Context.ConnectionId, user);
+                _userService.AddUser(Context.ConnectionId, user, gameId);
 
-                await Clients.All.SendAsync("UpdateUserList", _userService.GetOnlineUsers());
+                await Clients.Group(gameId).SendAsync("UpdateUserList", _userService.GetOnlineUsers(gameId));
+
+                await Groups.AddToGroupAsync(Context.ConnectionId, gameId);
             }
 
             await base.OnConnectedAsync();
@@ -34,45 +37,47 @@ namespace ChatService.Hubs
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
+            var gameId = _userService.GetGameId(Context.ConnectionId);
             _userService.RemoveUser(Context.ConnectionId);
 
-            await Clients.All.SendAsync("UpdateUserList", _userService.GetOnlineUsers());
+            if (!string.IsNullOrEmpty(gameId))
+            {
+                await Clients.Group(gameId).SendAsync("UpdateUserList", _userService.GetOnlineUsers(gameId));
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameId);
+            }
 
             await base.OnDisconnectedAsync(exception);
         }
 
-        public async Task SendMessage(string user, string message)
+        public async Task SendMessageToGame(string gameId, string user, string message)
         {
-            Console.WriteLine($"SendMessage called by {user}: {message}");
-            if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(user))
+            if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(user) || string.IsNullOrWhiteSpace(gameId))
                 return;
 
             var msg = new Message
             {
                 Sender = user,
-                Content = message,      // promenjeno
-                SentAt = DateTime.UtcNow // promenjeno
+                Content = message,
+                SentAt = DateTime.UtcNow,
+                GameId = gameId
             };
 
             await _messageService.AddMessageAsync(msg);
 
-            await Clients.All.SendAsync("ReceiveMessage", msg);
+            await Clients.Group(gameId).SendAsync("ReceiveMessage", msg);
         }
 
-
-        public async Task LoadOlderMessages(int count, DateTime? before = null)
+        public async Task LoadOlderMessages(string gameId, int count, DateTime? before = null)
         {
-            Console.WriteLine($"LoadOlderMessages called with count={count}, before={before}");
-
             List<Message> olderMessages;
 
             if (before == null || before == default(DateTime))
             {
-                olderMessages = await _messageService.GetRecentMessagesAsync(count);
+                olderMessages = await _messageService.GetRecentMessagesAsync(gameId, count);
             }
             else
             {
-                olderMessages = await _messageService.GetOlderMessagesAsync(count, before.Value);
+                olderMessages = await _messageService.GetOlderMessagesAsync(gameId, count, before.Value);
             }
 
             if (olderMessages.Count == 0)

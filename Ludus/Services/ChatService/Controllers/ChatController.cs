@@ -24,15 +24,16 @@ namespace ChatService.Controllers
             return Ok(new Message
             {
                 Sender = "System",
-                Content = "Chat service is running", // promenjeno sa Text
-                SentAt = DateTime.UtcNow             // promenjeno sa Timestamp
+                Content = "Chat service is running",
+                SentAt = DateTime.UtcNow
             });
         }
 
-        [HttpGet("messages")]
-        public async Task<ActionResult<List<Message>>> GetMessages()
+        // GET api/chat/messages/{gameId}
+        [HttpGet("messages/{gameId}")]
+        public async Task<ActionResult<List<Message>>> GetMessages(string gameId)
         {
-            var messages = await _messageService.GetMessagesAsync();
+            var messages = await _messageService.GetMessagesAsync(gameId);
             return Ok(messages);
         }
     }

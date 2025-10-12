@@ -23,42 +23,37 @@ namespace ChatService.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<Message>> GetMessagesAsync(int limit = 50)
+        public async Task<List<Message>> GetMessagesAsync(string gameId, int limit = 50)
         {
             var messages = await _context.Messages
-                .OrderByDescending(m => m.SentAt) // promenjeno sa Timestamp
+                .Where(m => m.GameId == gameId)
+                .OrderByDescending(m => m.SentAt)
                 .Take(limit)
                 .ToListAsync();
 
-            return messages
-                .OrderBy(m => m.SentAt)
-                .ToList();
+            return messages.OrderBy(m => m.SentAt).ToList();
         }
 
-        public async Task<List<Message>> GetRecentMessagesAsync(int count)
+        public async Task<List<Message>> GetRecentMessagesAsync(string gameId, int count)
         {
             var messages = await _context.Messages
+                .Where(m => m.GameId == gameId)
                 .OrderByDescending(m => m.SentAt)
                 .Take(count)
                 .ToListAsync();
 
-            return messages
-                .OrderBy(m => m.SentAt)
-                .ToList();
+            return messages.OrderBy(m => m.SentAt).ToList();
         }
 
-        public async Task<List<Message>> GetOlderMessagesAsync(int count, DateTime before)
+        public async Task<List<Message>> GetOlderMessagesAsync(string gameId, int count, DateTime before)
         {
-            Console.WriteLine($"Querying messages before {before}, count={count}");
             var messages = await _context.Messages
-                .Where(m => m.SentAt < before)
+                .Where(m => m.GameId == gameId && m.SentAt < before)
                 .OrderByDescending(m => m.SentAt)
                 .Take(count)
                 .ToListAsync();
 
-            return messages
-                .OrderBy(m => m.SentAt)
-                .ToList();
+            return messages.OrderBy(m => m.SentAt).ToList();
         }
     }
 }

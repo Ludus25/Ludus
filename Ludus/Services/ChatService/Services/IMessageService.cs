@@ -8,8 +8,8 @@ namespace ChatService.Services
     public interface IMessageService
     {
         Task AddMessageAsync(Message message);
-        Task<List<Message>> GetRecentMessagesAsync(int count);
-        Task<List<Message>> GetOlderMessagesAsync(int count, DateTime before);
-        Task<List<Message>> GetMessagesAsync(int limit = 50); // opcionalno, ali ako ga koristiš u kodu — mora ovde biti
+        Task<List<Message>> GetMessagesAsync(string gameId, int limit = 50);
+        Task<List<Message>> GetRecentMessagesAsync(string gameId, int count);
+        Task<List<Message>> GetOlderMessagesAsync(string gameId, int count, DateTime before);
     }
 }

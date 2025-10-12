@@ -14,7 +14,6 @@ namespace ChatService.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Mapiranje klase Message na tabelu "messages"
             modelBuilder.Entity<Message>()
                 .ToTable("messages")
                 .HasKey(m => m.Id);
@@ -31,6 +30,11 @@ namespace ChatService.Data
             modelBuilder.Entity<Message>()
                 .Property(m => m.SentAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            modelBuilder.Entity<Message>()
+                .Property(m => m.GameId)
+                .IsRequired()
+                .HasMaxLength(50); 
         }
     }
 }
