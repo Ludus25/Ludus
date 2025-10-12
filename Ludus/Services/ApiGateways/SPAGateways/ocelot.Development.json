@@ -63,6 +63,54 @@
                 "AuthenticationProviderKey": "LudusAuth",
                 "AllowedScopes": []
             }
+        },
+        {
+            "DownstreamPathTemplate": "/api/auth/register",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "authenticationservice",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/auth/register",
+            "UpstreamHttpMethod": [ "POST" ]
+        },
+        {
+            "DownstreamPathTemplate": "/api/auth/login",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "authenticationservice",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/auth/login",
+            "UpstreamHttpMethod": [ "POST" ]
+        },
+        {
+            "DownstreamPathTemplate": "/api/auth/verify-2fa",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "authenticationservice",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/auth/verify-2fa",
+            "UpstreamHttpMethod": [ "POST" ]
+        },
+        {
+            "DownstreamPathTemplate": "/api/auth/change-password",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "authenticationservice",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/auth/change-password",
+            "UpstreamHttpMethod": [ "PUT" ]
         }
     ],
     "GlobalConfiguration": {
