@@ -5,7 +5,8 @@
       "commandVersion": "1.0",
       "serviceActions": {
         "xogameservice.api": "StartDebugging",
-        "ludusgateways": "StartDebugging"
+        "ludusgateways": "StartDebugging",
+        "matchmakingservice": "StartDebugging"
       }
     }
   }

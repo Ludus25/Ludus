@@ -1,3 +1,4 @@
+using StackExchange.Redis;
 using XOGameService.API.Hubs;
 using XOGameService.API.Middlewares;
 using XOGameService.API.Repositories;
@@ -16,6 +17,10 @@ builder.Services.AddStackExchangeRedisCache(options =>
     {
         options.Configuration = builder.Configuration.GetValue<string>("RedisCacheSettings:ConnectionString");
     }
+);
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+    ConnectionMultiplexer.Connect(builder.Configuration.GetValue<string>("RedisCacheSettings:ConnectionString"))
 );
 
 builder.Services.AddScoped<IXOGameRepository, RedisXOGameRepository>();

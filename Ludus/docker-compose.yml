@@ -1,6 +1,14 @@
+
 services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+
   xogamedb:
     image: redis:alpine
+    container_name: xogamedb
+    restart: always
+    ports:
+      - "6379:6379"
 
   postgres-db:
     image: postgres:latest
@@ -16,10 +24,34 @@ services:
 
   xogameservice.api:
     image: ${DOCKER_REGISTRY-}xogameserviceapi
+    container_name: xogame.api
     build:
       context: .
       dockerfile: Services/XOGameService/XOGameService.API/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+    depends_on:
+      - xogamedb
+    ports:
+      - "8001:8080"
 
+  authenticationservice:
+    image: authenticationservice
+    container_name: ludus-authenticationservice
+    build:
+      context: Services/AuthenticationService/AuthenticationService
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=Ludus;User Id=sa;Password=LudusBaza123!;TrustServerCertificate=True;
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    ports:
+      - "7000:8080"
+  
   ludusgateways:
     image: ${DOCKER_REGISTRY-}ludusgateways
     build:
@@ -38,5 +70,12 @@ services:
     ports:
       - "5090:5090"
 
+  matchmakingservice:
+    image: ${DOCKER_REGISTRY-}matchmakingservice
+    build:
+      context: .
+      dockerfile: Services/matchmaking/MatchmakingService/Dockerfile
+
 volumes:
   postgres-data:
+  mssql_data:

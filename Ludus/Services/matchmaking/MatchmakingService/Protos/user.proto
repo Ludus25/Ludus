@@ -1,0 +1,20 @@
+syntax = "proto3";
+package user;
+
+message Player {
+  string playerId = 1;
+  int32 rating = 2;
+}
+
+message GetPlayerRequest {
+  string playerId = 1;
+}
+
+message GetPlayerResponse {
+  Player player = 1;
+}
+
+service UserService {
+  rpc GetPlayer(GetPlayerRequest) returns (GetPlayerResponse);
+}
+

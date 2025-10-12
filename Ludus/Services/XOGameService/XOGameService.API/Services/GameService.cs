@@ -142,5 +142,15 @@ namespace XOGameService.API.Services
 
             return false;
         }
+
+        public async Task<GameState?> GetActiveGameByUserId(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId)) return null;
+
+            var game = await _repository.GetGameByUserIdAndStatus(userId, GameStatus.InProgress);
+            return game;
+        }
     }
+
+
 }
