@@ -14,10 +14,6 @@
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "LudusAuth",
                 "AllowedScopes": []
-            },
-            "AddHeadersToRequest": {
-                "X-UserId": "Claims[sub]",
-                "X-UserRole": "Claims[http://schemas.microsoft.com/ws/2008/06/identity/claims/role]"
             }
         },
         {
@@ -34,10 +30,6 @@
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "LudusAuth",
                 "AllowedScopes": []
-            },
-            "AddHeadersToRequest": {
-                "X-UserId": "Claims[sub]",
-                "X-UserRole": "Claims[http://schemas.microsoft.com/ws/2008/06/identity/claims/role]"
             }
         },
         {
