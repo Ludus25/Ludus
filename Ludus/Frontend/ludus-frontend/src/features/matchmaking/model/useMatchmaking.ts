@@ -9,7 +9,6 @@ export function useMatchmaking(navigate?: NavigateFunction) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // SignalR connection
   const hub = useMemo(() => 
     new signalR.HubConnectionBuilder()
       .withUrl('/ws/matchmakingHub')
@@ -18,7 +17,6 @@ export function useMatchmaking(navigate?: NavigateFunction) {
   , [])
 
   useEffect(() => {
-    // Start connection
     hub.start()
       .then(() => {
         console.log('[SIGNALR] Connected')
@@ -27,9 +25,9 @@ export function useMatchmaking(navigate?: NavigateFunction) {
         console.error('[SIGNALR] Connection error:', err)
       })
 
-    // Listen for MatchFound event
     hub.on('MatchFound', (data: any) => {
       console.log('[SIGNALR] Match found!', data)
+      
       const newStatus = {
         status: 'matched' as const,
         matchId: data.matchId,
@@ -37,10 +35,10 @@ export function useMatchmaking(navigate?: NavigateFunction) {
       }
       setStatus(newStatus)
       
-      // Navigate automatically
+      // ✅ DODATO - Redirect ODMAH ovde, ne čekaj useEffect
       if (navigate && data.matchId) {
+        console.log('[SIGNALR] Redirecting to game...', data.matchId)
         setTimeout(() => {
-          console.log('[SIGNALR] Auto-navigating to game')
           navigate(`/game?matchId=${data.matchId}`)
         }, 2000)
       }
@@ -55,7 +53,6 @@ export function useMatchmaking(navigate?: NavigateFunction) {
     setError(null)
     setLoading(true)
     try {
-      // Ensure connected
       if (hub.state !== signalR.HubConnectionState.Connected) {
         console.log('[SIGNALR] Connecting...')
         await hub.start()
@@ -87,5 +84,5 @@ export function useMatchmaking(navigate?: NavigateFunction) {
     }
   }, [])
 
-  return { status, loading, error, join, checkStatus }
+  return { status, loading, error, join, checkStatus, polling: status?.status === 'searching' }
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMatchmaking } from '../model/useMatchmaking'
 import MatchStatus from '../ui/MatchStatus'
@@ -8,9 +8,20 @@ const { Title, Text } = Typography
 
 export default function MatchmakingPage() {
   const navigate = useNavigate()
-  const { status, loading, error, join, checkStatus } = useMatchmaking(navigate)
+  const { status, loading, error, join, checkStatus, polling } = useMatchmaking(navigate) // ✅ Prosledite navigate
   const [playerId, setPlayerId] = useState('player1')
   const [rating, setRating] = useState(1500)
+
+  // ✅ Ostavite useEffect kao fallback
+  useEffect(() => {
+    if (status?.status === 'matched' && status.matchId) {
+      const timer = setTimeout(() => {
+        console.log('[PAGE] Fallback navigating to game...', status.matchId)
+        navigate(`/game?matchId=${status.matchId}`)
+      }, 2000)
+      return () => clearTimeout(timer)
+    }
+  }, [status, navigate])
 
   const handleJoin = async () => {
     await join({ playerId, rating })
@@ -28,7 +39,7 @@ export default function MatchmakingPage() {
               value={playerId}
               onChange={e => setPlayerId(e.target.value)}
               placeholder="Unesi svoj ID"
-              disabled={status?.status === 'searching'}
+              disabled={polling}
             />
           </div>
 
@@ -40,7 +51,7 @@ export default function MatchmakingPage() {
               min={0}
               max={3000}
               style={{ width: '100%' }}
-              disabled={status?.status === 'searching'}
+              disabled={polling}
             />
           </div>
 
@@ -48,13 +59,13 @@ export default function MatchmakingPage() {
             type="primary"
             onClick={handleJoin}
             loading={loading}
-            disabled={status?.status === 'searching'}
+            disabled={polling}
             block
           >
-            {status?.status === 'searching' ? 'Tražimo protivnika...' : 'Nađi Match'}
+            {polling ? 'Tražimo protivnika...' : 'Nađi Match'}
           </Button>
 
-          <MatchStatus status={status} polling={status?.status === 'searching'} />
+          <MatchStatus status={status} polling={polling} />
 
           {error && <Alert type="error" message={String(error)} showIcon />}
         </Space>
