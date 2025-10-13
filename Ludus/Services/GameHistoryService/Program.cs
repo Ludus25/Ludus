@@ -25,7 +25,7 @@ internal class Program
             {
                 cfg.Host(builder.Configuration["RabbitMQ:HostAddress"]);
 
-                string gameEndedQueueName = builder.Configuration["RabbitMQ:GameEndedeQueue"];
+                string gameEndedQueueName = builder.Configuration["RabbitMQ:GameEndedQueue"];
                 string chatLogQueueName = builder.Configuration["RabbitMQ:ChatLogQueue"];
 
                 cfg.ReceiveEndpoint(gameEndedQueueName, e =>
