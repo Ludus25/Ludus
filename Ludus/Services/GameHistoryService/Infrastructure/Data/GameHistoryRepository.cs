@@ -14,9 +14,9 @@ namespace Data
             _db = db;
         }
 
-        public async Task SaveGameAsync(GameHistory gameHistory)
+        public async Task SaveGameAsync(GameHistory gameHistory, CancellationToken ct)
         {
-            var existing = await _db.GameHistories.FindAsync(gameHistory.MatchId);
+            var existing = await _db.GameHistories.FirstOrDefaultAsync(g => g.MatchId == gameHistory.MatchId, ct);
             if (existing != null)
             {
                 existing.EndedAt = gameHistory.EndedAt;
@@ -28,15 +28,15 @@ namespace Data
             }
             else
             {
-                await _db.GameHistories.AddAsync(gameHistory);
+                await _db.GameHistories.AddAsync(gameHistory, ct);
             }
             
-            await _db.SaveChangesAsync();
+            await _db.SaveChangesAsync(ct);
         }
 
-        public async Task AppendChatMessageAsync(string matchId, IEnumerable<ChatMessage> messages)
+        public async Task AppendChatMessageAsync(string matchId, IEnumerable<ChatMessage> messages, CancellationToken ct)
         {
-            var match = await _db.GameHistories.Include(g => g.ChatMessages).FirstOrDefaultAsync(g =>  g.MatchId == matchId);
+            var match = await _db.GameHistories.Include(g => g.ChatMessages).FirstOrDefaultAsync(g =>  g.MatchId == matchId, ct);
             if (match == null)
             {
                 match = new GameHistory
@@ -49,7 +49,7 @@ namespace Data
                     ChatMessages = new List<ChatMessage>()
                 };
 
-                await _db.GameHistories.AddAsync(match);
+                await _db.GameHistories.AddAsync(match, ct);
             }
 
             foreach (var m in messages)
@@ -58,17 +58,17 @@ namespace Data
                 match.ChatMessages.Add(m);
             }
 
-            await _db.SaveChangesAsync();
+            await _db.SaveChangesAsync(ct);
         }
 
-        public async Task<IEnumerable<GameHistory>> GetGamesByUserAsync(string userId, int limit = 50, int offset = 0)
+        public async Task<IEnumerable<GameHistory>> GetGamesByUserAsync(string userId, int limit, int offset, CancellationToken ct)
         {
-            return await _db.GameHistories.Where(g => g.PlayerUserIds.Contains(userId)).OrderByDescending(g => g.EndedAt).Skip(offset).Take(limit).Include(g => g.ChatMessages).ToListAsync();
+            return await _db.GameHistories.AsNoTracking().Where(g => g.PlayerUserIds.Contains(userId)).OrderByDescending(g => g.EndedAt).Skip(offset).Take(limit).Include(g => g.ChatMessages).ToListAsync(ct);
         }
 
-        public async Task<GameHistory?> GetByMatchIdAsync(string matchId)
+        public async Task<GameHistory?> GetByMatchIdAsync(string matchId, CancellationToken ct)
         {
-            return await _db.GameHistories.Include(g => g.ChatMessages).FirstOrDefaultAsync(g => g.MatchId == matchId);
+            return await _db.GameHistories.Include(g => g.ChatMessages).FirstOrDefaultAsync(g => g.MatchId == matchId, ct);
         }
     }
 }
