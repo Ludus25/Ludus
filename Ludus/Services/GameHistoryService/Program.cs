@@ -2,12 +2,12 @@ using Microsoft.EntityFrameworkCore;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using MassTransit;
+using MediatR;
 
 using Data;
 using Interfaces;
 using Consumers;
-using MassTransit;
-using MediatR;
 
 internal class Program
 {
@@ -98,6 +98,11 @@ internal class Program
             app.UseSwaggerUI();
         }
 
+        app.UseExceptionHandler("/error");
+        app.Map("/error", (HttpContext http) =>
+            Results.Problem(title: "An unexpected error occurred.",
+                            statusCode: StatusCodes.Status500InternalServerError));
+
         app.UseRouting();
 
         if (!string.IsNullOrEmpty(jwtKey))
@@ -107,12 +112,6 @@ internal class Program
         }
 
         app.MapControllers();
-
-        //using (var scope = app.Services.CreateScope())
-        //{
-        //    var db = scope.ServiceProvider.GetRequiredService<GameHistoryDbContext>();
-        //    db.Database.Migrate();
-        //}
 
         app.Run();
     }
