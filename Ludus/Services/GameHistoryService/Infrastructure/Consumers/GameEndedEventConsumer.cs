@@ -1,5 +1,7 @@
 using MassTransit;
+using MediatR;
 
+using Commands;
 using Interfaces;
 using Common.Entities;
 using Common.Dto;
@@ -9,12 +11,12 @@ namespace Consumers
 {
     public class GameEndedEventConsumer : IConsumer<GameEndedEvent>
     {
-        private readonly IGameHistoryService _historyService;
+        private readonly IMediator _mediator;
         private readonly ILogger<GameEndedEventConsumer> _logger;
 
-        public GameEndedEventConsumer(IGameHistoryService historyService, ILogger<GameEndedEventConsumer> logger)
+        public GameEndedEventConsumer(IMediator mediator, ILogger<GameEndedEventConsumer> logger)
         {
-            _historyService = historyService;
+            _mediator = mediator;
             _logger = logger;
         }
 
@@ -33,7 +35,7 @@ namespace Consumers
                 MoveHistory = dto.MoveHistory,
                 WinnerUserId = dto.WinnerUserId
             };
-            await _historyService.SaveGameAsync(history);
+            await _mediator.Send(new SaveGameCommand(history));
         }
     }
 }

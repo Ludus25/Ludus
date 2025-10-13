@@ -1,13 +1,8 @@
-using Microsoft.Extensions.Options;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
-
 using MassTransit;
+using MediatR;
 
+using Commands;
 using Interfaces;
-using Messaging;
-using System.Text;
-using System.Text.Json;
 using Common.Dto;
 
 
@@ -15,12 +10,12 @@ namespace Consumers
 {
     public class ChatLogEventConsumer : IConsumer<ChatLogEvent>
     {
-        private readonly IGameHistoryService _historyService;
+        private readonly IMediator _mediator;
         private readonly ILogger<ChatLogEventConsumer> _logger;
 
-        public ChatLogEventConsumer(IGameHistoryService historyService, ILogger<ChatLogEventConsumer> logger)
+        public ChatLogEventConsumer(IMediator mediator, ILogger<ChatLogEventConsumer> logger)
         {
-            _historyService = historyService;
+            _mediator = mediator;
             _logger = logger;
         }
 
@@ -30,7 +25,7 @@ namespace Consumers
 
             _logger.LogInformation("Received ChatLogEvent for match {MatchId}", dto.MatchId);
 
-            await _historyService.AppendChatAsync(dto.MatchId, dto.Messages);
+            await _mediator.Send(new AppendChatCommand(dto.MatchId, dto.Messages));
         }
     }
 }

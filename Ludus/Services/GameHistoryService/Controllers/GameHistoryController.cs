@@ -1,6 +1,8 @@
-using Interfaces;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+
+using Queries;
 
 namespace Controllers
 {
@@ -9,17 +11,17 @@ namespace Controllers
     [Authorize]
     public class GameHistoryController : ControllerBase
     {
-        private readonly IGameHistoryService _historyService;
+        private readonly IMediator _mediator;
 
-        public GameHistoryController(IGameHistoryService historyService)
+        public GameHistoryController(IMediator mediator)
         {
-            _historyService = historyService;
+            _mediator = mediator;
         }
 
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetGamesByPlayer(string userId, [FromQuery] int limit = 50, [FromQuery] int offset = 0)
         {
-            var games = await _historyService.GetGamesByUserAsync(userId, limit, offset);
+            var games = await _mediator.Send(new GetGamesByUserQuery(userId, limit, offset));
             var result = games.Select(g => new {
                 g.MatchId,
                 g.PlayerUserIds,
@@ -36,7 +38,7 @@ namespace Controllers
         [HttpGet("match/{matchId}")]
         public async Task<IActionResult> GetByMatch(string matchId)
         {
-            var match = await _historyService.GetByMatchIdAsync(matchId);
+            var match = await _mediator.Send(new GetGameByMatchIdQuery(matchId));
             if (match == null)
             {
                 return NotFound();

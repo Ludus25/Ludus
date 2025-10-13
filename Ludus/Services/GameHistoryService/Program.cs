@@ -7,7 +7,7 @@ using Data;
 using Interfaces;
 using Consumers;
 using MassTransit;
-using Services;
+using MediatR;
 
 internal class Program
 {
@@ -84,7 +84,7 @@ internal class Program
 
         // Add services to the container.
         builder.Services.AddScoped<IGameHistoryRepository, GameHistoryRepository>();
-        builder.Services.AddScoped<IGameHistoryService, GameHistoryServiceImpl>();
+        builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
