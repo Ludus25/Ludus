@@ -7,7 +7,7 @@ import AuthPage from "../features/authentication/pages/authPage";
 import Header from '../features/authentication/ui/header.tsx'
 import React, { useState, useEffect } from 'react';
 
-// ProtectedRoute komponenta koja čuva rutu
+
 const ProtectedRoute: React.FC<{ element: React.ReactElement }> = ({ element }) => {
   const [isAuth, setIsAuth] = useState(isLoggedIn());
 
@@ -48,6 +48,9 @@ export default function App() {
           <Route path="/" element={<Navigate to="/auth" />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/dashboard" element={<ProtectedRoute element={<DashboardPage />} />} />
+          <Route path="/" element={<Navigate to="/dashboard" />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/game/:gameId" element={<GamePage />} />
           <Route path="/game" element={<GamePage />} />
           <Route path="/matchmaking" element={<MatchmakingPage />} />
           <Route path="*" element={<Navigate to="/auth" />} />

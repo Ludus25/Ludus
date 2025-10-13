@@ -111,6 +111,54 @@
             ],
             "UpstreamPathTemplate": "/auth/change-password",
             "UpstreamHttpMethod": [ "PUT" ]
+        },
+        {
+            "DownstreamPathTemplate": "/api/matchmaking/join",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "matchmakingservice",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/matchmaking/join",
+            "UpstreamHttpMethod": [ "POST" ]
+        },
+        {
+            "DownstreamPathTemplate": "/api/matchmaking/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "matchmakingservice",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/matchmaking/{everything}",
+            "UpstreamHttpMethod": [ "GET", "POST" ]
+        },
+        {
+            "DownstreamPathTemplate": "/matchmakingHub",
+            "DownstreamScheme": "ws",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "matchmakingservice",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/ws/matchmakingHub",
+            "UpstreamHttpMethod": [ "GET" ]
+        },
+        {
+            "DownstreamPathTemplate": "/matchmakingHub/negotiate",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "matchmakingservice",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/ws/matchmakingHub/negotiate",
+            "UpstreamHttpMethod": [ "POST" ]
         }
     ],
     "GlobalConfiguration": {

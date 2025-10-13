@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGame } from '../model/useGame';
+import { useSearchParams, useParams } from 'react-router-dom';
 import Board from '../ui/Board';
 import { isInProgress, statusText } from '../model/types';
 import { Card, Row, Col, Input, Button, Typography, Space, Alert, Divider } from 'antd';
@@ -9,18 +10,50 @@ const empty9 = Array(9).fill(0) as any;
 
 export default function GamePage() {
   const { state, loading, error, create, load, move } = useGame();
-  const [actingUserId, setActing] = useState('p1');
-  const [x, setX] = useState('p1');
-  const [o, setO] = useState('p2');
-  const [gid, setGid] = useState('');
+  const [searchParams] = useSearchParams();
+  const { gameId } = useParams<{ gameId: string }>();
+  
+  const player1FromUrl = searchParams.get('player1');
+  const player2FromUrl = searchParams.get('player2');
+  
+  const [actingUserId, setActing] = useState(player1FromUrl || 'p1');
+  const [x, setX] = useState(player1FromUrl || 'p1');
+  const [o, setO] = useState(player2FromUrl || 'p2');
+  const [gid, setGid] = useState(gameId || '');
+
+  useEffect(() => {
+    if (gameId) {
+      console.log('[GAME] Auto-loading game:', gameId);
+      console.log('[GAME] Player1:', player1FromUrl, 'Player2:', player2FromUrl);
+      load(gameId);
+    }
+  }, [gameId]);
+
+  useEffect(() => {
+    if (player1FromUrl) {
+      setX(player1FromUrl);
+      setActing(player1FromUrl);
+    }
+    if (player2FromUrl) {
+      setO(player2FromUrl);
+    }
+  }, [player1FromUrl, player2FromUrl]);
 
   return (
     <Space direction="vertical" size="large" style={{ width: '100%' }}>
-      <Title level={2}>XO</Title>
+      <Title level={2}>XO Game</Title>
+
+      {(player1FromUrl && player2FromUrl) && (
+        <Alert 
+          type="info" 
+          message={`Match: ${player1FromUrl} (X) vs ${player2FromUrl} (O)`} 
+          showIcon 
+        />
+      )}
 
       <Row gutter={16}>
         <Col xs={24} md={12}>
-          <Card title="Kreiraj" bordered>
+          <Card title="Kreiraj Novu Igru" bordered>
             <Space direction="vertical" style={{ width: '100%' }}>
               <Input value={x} onChange={e=>setX(e.target.value)} placeholder="Player X Id" />
               <Input value={o} onChange={e=>setO(e.target.value)} placeholder="Player O Id" />
@@ -31,7 +64,7 @@ export default function GamePage() {
           </Card>
         </Col>
         <Col xs={24} md={12}>
-          <Card title="Join" bordered>
+          <Card title="Join Postojeću Igru" bordered>
             <Space direction="vertical" style={{ width: '100%' }}>
               <Input value={gid} onChange={e=>setGid(e.target.value)} placeholder="Game Id" />
               <Button onClick={()=>load(gid)} loading={loading}>
@@ -45,9 +78,13 @@ export default function GamePage() {
       <Card>
         <Space direction="vertical" style={{ width: '100%' }}>
           <Space align="center">
-            <Text strong>X-UserId:</Text>
-            <Input style={{ maxWidth: 220 }} value={actingUserId} onChange={e=>setActing(e.target.value)} />
-            <Text type="secondary">Prvi potez igra X ({x}). Stavi X-UserId = {x} za prvi klik.</Text>
+            <Text strong>Tvoj UserId:</Text>
+            <Input 
+              style={{ maxWidth: 220 }} 
+              value={actingUserId} 
+              onChange={e=>setActing(e.target.value)} 
+            />
+            <Text type="secondary">Trenutno igraš kao: {actingUserId}</Text>
           </Space>
 
           <Divider />
@@ -55,7 +92,7 @@ export default function GamePage() {
           <Space direction="vertical" size="small">
             {state ? (
               isInProgress(state.status)
-                ? <Text strong>Na potezu: {state.nextPlayer}</Text>
+                ? <Text strong>Na potezu: {state.nextPlayer} ({state.nextPlayer === 'X' ? x : o})</Text>
                 : <Alert type={state.status === 1 || state.status === 'XWon' ? 'success' :
                                state.status === 2 || state.status === 'OWon' ? 'warning' : 'info'}
                          message={statusText(state.status)} showIcon />
@@ -69,7 +106,12 @@ export default function GamePage() {
           />
 
           {state && (
-            <Text type="secondary">GameId: {state.gameId} · Verzija: {state.version}</Text>
+            <Space direction="vertical">
+              <Text type="secondary">GameId: {state.gameId}</Text>
+              <Text type="secondary">Player X: {state.playerXId || x}</Text>
+              <Text type="secondary">Player O: {state.playerOId || o}</Text>
+              <Text type="secondary">Verzija: {state.version}</Text>
+            </Space>
           )}
 
           {error && <Alert type="error" message={String(error)} showIcon />}

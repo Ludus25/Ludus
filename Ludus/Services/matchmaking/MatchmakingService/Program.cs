@@ -1,6 +1,7 @@
 using MatchmakingService.Application.Commands;
 using MatchmakingService.Application.Services;
 using MatchmakingService.Infrastructure.Grpc;
+using MatchmakingService.Hubs;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -12,10 +13,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// SignalR
+builder.Services.AddSignalR();
+
 // DI for repository and event publisher
 builder.Services.AddSingleton<IMatchRepository, InMemoryMatchRepository>();
 
-// If you have RabbitMQ locally, set host from configuration, else use NullEventPublisher
+// RabbitMQ publisher
 var rabbitHost = builder.Configuration["RABBIT_HOST"];
 if (!string.IsNullOrEmpty(rabbitHost))
 {
@@ -23,25 +27,14 @@ if (!string.IsNullOrEmpty(rabbitHost))
 }
 else
 {
-    // simple console publisher
     builder.Services.AddSingleton<IEventPublisher>(sp => new ConsoleEventPublisher());
 }
 
-// Register command handler (depends on repo & publisher)
+// Register command handler
 builder.Services.AddScoped<JoinCommandHandler>();
 
-// Optionally register gRPC client wrapper (address from config)
-var userGrpcAddr = builder.Configuration["USER_GRPC_ADDRESS"];
-if (!string.IsNullOrEmpty(userGrpcAddr))
-{
-    builder.Services.AddSingleton(new UserGrpcClient(userGrpcAddr));
-}
-
-var gameGrpcAddr = builder.Configuration["GAME_GRPC_ADDRESS"];
-if (!string.IsNullOrEmpty(gameGrpcAddr))
-{
-    builder.Services.AddSingleton(new GameGrpcClient(gameGrpcAddr));
-}
+// ✅ SAMO GameGrpcClient (UserGrpcClient uklonjen)
+builder.Services.AddSingleton<GameGrpcClient>();
 
 var app = builder.Build();
 
@@ -51,12 +44,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<MatchmakingHub>("/matchmakingHub");
 app.Run();
 
-// --- small ConsoleEventPublisher fallback (in same file or separate)
 public class ConsoleEventPublisher : IEventPublisher
 {
     public void PublishMatchCreated(object payload)

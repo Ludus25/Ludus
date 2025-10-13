@@ -1,7 +1,8 @@
 using Grpc.Net.Client;
 using System.Threading.Tasks;
-using Game; // generated namespace from proto
+using Game;
 using MatchmakingService.Entities;
+using Microsoft.Extensions.Configuration;
 
 namespace MatchmakingService.Infrastructure.Grpc
 {
@@ -9,8 +10,16 @@ namespace MatchmakingService.Infrastructure.Grpc
     {
         private readonly GameService.GameServiceClient _client;
         
-        public GameGrpcClient(string address)
+        public GameGrpcClient(IConfiguration configuration)
         {
+            var address = configuration["GAME_GRPC_ADDRESS"] 
+                          ?? throw new InvalidOperationException("GAME_GRPC_ADDRESS not configured");
+            
+            Console.WriteLine($"[GRPC-CLIENT] Connecting to Game Service at: {address}");
+            
+            // Omogući HTTP/2 bez TLS-a
+            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            
             var channel = GrpcChannel.ForAddress(address);
             _client = new GameService.GameServiceClient(channel);
         }
@@ -19,6 +28,8 @@ namespace MatchmakingService.Infrastructure.Grpc
         {
             try
             {
+                Console.WriteLine($"[GRPC-CLIENT] Sending StartGame request - MatchId: {matchId}, Players: {players.Count}");
+                
                 var request = new StartGameRequest
                 {
                     MatchId = matchId
@@ -34,12 +45,13 @@ namespace MatchmakingService.Infrastructure.Grpc
                 }
                 
                 var response = await _client.StartGameAsync(request);
-                Console.WriteLine($"[GRPC-GAME] Game started successfully: {response.GameServerUrl}");
+                Console.WriteLine($"[GRPC-CLIENT] ✅ Game started successfully: {response.GameServerUrl}");
                 return response;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[GRPC-GAME-ERROR] Failed to start game: {ex.Message}");
+                Console.WriteLine($"[GRPC-CLIENT] ❌ Failed to start game: {ex.Message}");
+                Console.WriteLine($"[GRPC-CLIENT] Stack trace: {ex.StackTrace}");
                 return null;
             }
         }

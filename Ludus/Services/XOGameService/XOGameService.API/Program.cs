@@ -7,17 +7,14 @@ using XOGameService.API.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddStackExchangeRedisCache(options =>
-    {
-        options.Configuration = builder.Configuration.GetValue<string>("RedisCacheSettings:ConnectionString");
-    }
-);
+{
+    options.Configuration = builder.Configuration.GetValue<string>("RedisCacheSettings:ConnectionString");
+});
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
     ConnectionMultiplexer.Connect(builder.Configuration.GetValue<string>("RedisCacheSettings:ConnectionString"))
@@ -25,6 +22,9 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 
 builder.Services.AddScoped<IXOGameRepository, RedisXOGameRepository>();
 builder.Services.AddScoped<IXOGameService, GameService>();
+
+// gRPC
+builder.Services.AddGrpc();
 
 const string CorsPolicy = "AllowAll";
 builder.Services.AddCors(options =>
@@ -44,7 +44,6 @@ app.UseCors(CorsPolicy);
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -55,6 +54,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapHub<GameHub>("/gamehub").RequireCors(CorsPolicy); ;
+app.MapHub<GameHub>("/gamehub").RequireCors(CorsPolicy);
+
+// gRPC endpoint
+app.MapGrpcService<GameGrpcService>();
 
 app.Run();

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMatchmaking } from '../model/useMatchmaking'
 import MatchStatus from '../ui/MatchStatus'
@@ -7,21 +7,10 @@ import { Card, Space, Input, Button, Typography, Alert, InputNumber } from 'antd
 const { Title, Text } = Typography
 
 export default function MatchmakingPage() {
-  const { status, loading, error, join, checkStatus, polling } = useMatchmaking()
   const navigate = useNavigate()
+  const { status, loading, error, join, checkStatus, polling } = useMatchmaking(navigate)
   const [playerId, setPlayerId] = useState('player1')
   const [rating, setRating] = useState(1500)
-
-  // Redirect kada se match pronađe
-  useEffect(() => {
-    if (status?.status === 'matched' && status.matchId) {
-      const timer = setTimeout(() => {
-        console.log('Navigating to game...', status.matchId)
-        navigate(`/game?matchId=${status.matchId}`)
-      }, 2000)
-      return () => clearTimeout(timer)
-    }
-  }, [status, navigate])
 
   const handleJoin = async () => {
     await join({ playerId, rating })
