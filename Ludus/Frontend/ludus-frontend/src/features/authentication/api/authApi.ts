@@ -1,5 +1,6 @@
 import { http } from '../../../shared/api/http'
 import type { RegisterResponse, LoginResponse, Verify2FAResponse } from '../model/types'
+import type { ChangePasswordRequest, ChangePasswordResponse } from '../model/types'
 
 interface RegisterDTO {
   email: string
@@ -53,4 +54,10 @@ export const authApi = {
     console.log('Verify2FA payload:', payload)
     return http.post<Verify2FAResponse>('/auth/verify-2fa', payload).then(res => res.data)
   }
+}
+
+
+export const changePassword = async (data: ChangePasswordRequest): Promise<ChangePasswordResponse> => {
+  const response = await http.put('/auth/change-password', data)
+  return response.data
 }

@@ -36,3 +36,13 @@ export interface Verify2FARequest {
   email: string
   code: string
 }
+export interface ChangePasswordRequest {
+  email: string;
+  oldPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export interface ChangePasswordResponse {
+  message: string;
+}
