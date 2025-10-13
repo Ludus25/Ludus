@@ -11,5 +11,6 @@ namespace Common.Entities
         public DateTime SentAt { get; set; } = DateTime.UtcNow;
 
         public string? GameMatchId { get; set; }
+        public GameHistory? GameHistory { get; set; }
     }
 }
