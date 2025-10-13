@@ -13,9 +13,9 @@ namespace Queries
             _repo = repo;
         }
 
-        public Task<IEnumerable<GameHistory>> Handle(GetGamesByUserQuery request, CancellationToken cancellationToken)
+        public Task<IEnumerable<GameHistory>> Handle(GetGamesByUserQuery request, CancellationToken ct)
         {
-            return _repo.GetGamesByUserAsync(request.UserId, request.Limit, request.Offset);
+            return _repo.GetGamesByUserAsync(request.UserId, request.Limit, request.Offset, ct);
         }
     }
 }

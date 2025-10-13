@@ -12,9 +12,9 @@ namespace Commands
             _repo = repo;
         }
 
-        public async Task Handle(SaveGameCommand request, CancellationToken cancellationToken)
+        public async Task Handle(SaveGameCommand request, CancellationToken ct)
         {
-            await _repo.SaveGameAsync(request.History);
+            await _repo.SaveGameAsync(request.History, ct);
         }
     }
 }

@@ -12,9 +12,14 @@ namespace Commands
             _repo = repo;
         }
 
-        public async Task Handle(AppendChatCommand request, CancellationToken cancellationToken)
+        public async Task Handle(AppendChatCommand request, CancellationToken ct)
         {
-            await _repo.AppendChatMessageAsync(request.MatchId, request.Messages);
+            foreach (var m in request.Messages)
+            {
+                m.GameMatchId = request.MatchId;
+            }
+
+            await _repo.AppendChatMessageAsync(request.MatchId, request.Messages, ct);
         }
     }
 }

@@ -13,9 +13,9 @@ namespace Queries
             _repo = repo;
         }
 
-        public Task<GameHistory?> Handle(GetGameByMatchIdQuery request, CancellationToken cancellationToken)
+        public Task<GameHistory?> Handle(GetGameByMatchIdQuery request, CancellationToken ct)
         {
-            return _repo.GetByMatchIdAsync(request.MatchId);
+            return _repo.GetByMatchIdAsync(request.MatchId, ct);
         }
     }
 }
