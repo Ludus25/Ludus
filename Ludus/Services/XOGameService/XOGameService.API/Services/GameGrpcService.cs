@@ -8,13 +8,16 @@ namespace XOGameService.API.Services
     {
         private readonly IXOGameService _xoGameService;
         private readonly ILogger<GameGrpcService> _logger;
+        private readonly IConfiguration _config;
 
         public GameGrpcService(
             IXOGameService xoGameService,
-            ILogger<GameGrpcService> logger)
+            ILogger<GameGrpcService> logger,
+            IConfiguration config)
         {
             _xoGameService = xoGameService;
             _logger = logger;
+            _config = config;
         }
 
         public override async Task<StartGameResponse> StartGame(
@@ -51,8 +54,9 @@ namespace XOGameService.API.Services
 
                 var gameState = await _xoGameService.CreateGame(player1Id, player2Id);
 
-                // ✅ DODATO: Player ID-jevi u URL-u kao query params
-                var gameUrl = $"http://localhost:8001/game/{gameState.GameId}?player1={player1Id}&player2={player2Id}";
+                // ✅ Čita frontend URL iz konfiguracije
+                var frontendUrl = _config["GameFrontendUrl"] ?? "http://localhost:5173";
+                var gameUrl = $"{frontendUrl}/game/{gameState.GameId}?player1={player1Id}&player2={player2Id}";
                 
                 _logger.LogInformation(
                     "[gRPC-SERVER] Igra kreirana - GameId: {GameId}, URL: {Url}",

@@ -31,15 +31,28 @@ export function useMatchmaking(navigate?: NavigateFunction) {
       const newStatus = {
         status: 'matched' as const,
         matchId: data.matchId,
+        gameUrl: data.gameUrl,
         players: data.players
       }
       setStatus(newStatus)
       
-      // ✅ DODATO - Redirect ODMAH ovde, ne čekaj useEffect
-      if (navigate && data.matchId) {
-        console.log('[SIGNALR] Redirecting to game...', data.matchId)
+      // Redirect when match found
+      if (navigate) {
         setTimeout(() => {
-          navigate(`/game?matchId=${data.matchId}`)
+          if (data.gameUrl) {
+            console.log('[SIGNALR] Redirecting to gameUrl:', data.gameUrl)
+            // Ekstraktuj gameId i params iz gameUrl
+            const url = new URL(data.gameUrl)
+            const gameId = url.pathname.split('/').pop()
+            const player1 = url.searchParams.get('player1')
+            const player2 = url.searchParams.get('player2')
+            
+            // Navigate interno (unutar iste React app)
+            navigate(`/game/${gameId}?player1=${player1}&player2=${player2}`)
+          } else if (data.matchId) {
+            console.log('[SIGNALR] Fallback redirect with matchId')
+            navigate(`/game?matchId=${data.matchId}`)
+          }
         }, 2000)
       }
     })

@@ -7,16 +7,24 @@ export default defineConfig({
   resolve: { alias: { '@': path.resolve(__dirname, 'src') } },
   server: {
     port: 5173,
+    strictPort: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:8010',
+        target: 'http://localhost:8010',  // Gateway
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
-      '/ws': {
-        target: 'http://localhost:8010', 
+      '/ws/matchmakingHub': {
+        target: 'http://localhost:5002',  // Matchmaking Service
         changeOrigin: true,
-        ws: true
+        ws: true,
+        rewrite: (path) => path.replace(/^\/ws\/matchmakingHub/, '/matchmakingHub')
+      },
+      '/ws/gamehub': {
+        target: 'http://localhost:8001',  // Game Service
+        changeOrigin: true,
+        ws: true,
+        rewrite: (path) => path.replace(/^\/ws\/gamehub/, '/gamehub')
       }
     }
   }
