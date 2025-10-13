@@ -1,16 +1,17 @@
-using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Common.Entities
 {
     public class ChatMessage
     {
-        [Key]
-        public Guid Id { get; set; } = Guid.NewGuid();
-        public string SenderUserId { get; set; } = string.Empty;
-        public string Message { get; set; } = string.Empty;
-        public DateTime SentAt { get; set; } = DateTime.UtcNow;
+        public Guid Id { get; set; }
+        public string SenderUserId { get; set; } = default!;
+        public string Message { get; set; } = default!;
+        public DateTime SentAt { get; set; }
 
-        public string? GameMatchId { get; set; }
+        public required string GameMatchId { get; set; }
+
+        [JsonIgnore]
         public GameHistory? GameHistory { get; set; }
     }
 }
