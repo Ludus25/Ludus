@@ -51,6 +51,7 @@ const AuthPage: React.FC = () => {
   if (resp.success) {
     alert('Registration successful! Please log in.')
     setMode('login') 
+    navigate('/auth')
   } else {
     console.error('Registration error:', resp.message)
     alert(resp.message ?? 'Registration failed')
@@ -64,7 +65,7 @@ const handleVerify = async (code: string) => {
   setVerifyLoading(true)
   try {
     const resp = await verify2FA({ email: emailFor2FA, code })
-
+    //if ((resp.success ?? true) && resp.token)
     if (resp?.token) {
       localStorage.setItem('token', resp.token)
       setShowVerify(false)
@@ -105,7 +106,7 @@ const handleVerify = async (code: string) => {
             <RegisterForm onSubmit={handleRegister} loading={loading} error={error} />
             <div className="create-account">
               <button type="button" onClick={() => setMode('login')}>
-                Back to Login
+                Back to login
               </button>
             </div>
           </>

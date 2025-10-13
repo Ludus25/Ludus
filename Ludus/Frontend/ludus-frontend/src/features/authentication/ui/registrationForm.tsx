@@ -24,6 +24,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit, loading, error })
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
+    // log za debug pre slanja
     const payload = { email, password, confirmPassword, mlb, firstName, lastName, enable2FA: false }
     console.log('Register payload:', payload)
 
