@@ -18,7 +18,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ApiGateways", "ApiGateways"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LudusGateways", "Services\ApiGateways\SPAGateways\LudusGateways.csproj", "{967BFEA8-44A6-40AE-955C-E07499344FFA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatService", "Services\ChatService\ChatService.csproj", "{53E7F1A3-D6CE-419A-800D-E85761765802}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatService", "Services\Chat\ChatService\ChatService.csproj", "{53E7F1A3-D6CE-419A-800D-E85761765802}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Matchmaking", "Matchmaking", "{0B24B155-7E8F-42FB-81A5-7868A050B8ED}"
 EndProject

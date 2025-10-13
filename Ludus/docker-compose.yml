@@ -61,7 +61,7 @@ services:
   chatservice:
     image: ${DOCKER_REGISTRY-}chatservice
     build:
-      context: Services/ChatService
+      context: Services/Chat/ChatService
       dockerfile: Dockerfile
     depends_on:
       - postgres-db

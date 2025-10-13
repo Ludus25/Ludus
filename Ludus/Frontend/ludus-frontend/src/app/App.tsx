@@ -1,7 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import GamePage from "../features/game/pages/GamePage";
 import DashboardPage from "../features/dashboard/pages/DashboardPage";
-import MatchmakingPage from "../features/matchmaking/pages/MatchmakingPage"
+import MatchmakingPage from "../features/matchmaking/pages/MatchmakingPage";
+import ChatPage from "../features/chat/pages/ChatPage"; 
 
 
 
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/game" element={<GamePage />} />
           <Route path="/matchmaking" element={<MatchmakingPage />} />
+	  <Route path="/chat" element={<ChatPage />} />
         </Routes>
       </div>
     </BrowserRouter>
