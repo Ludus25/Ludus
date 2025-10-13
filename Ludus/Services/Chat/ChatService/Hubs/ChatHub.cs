@@ -11,29 +11,51 @@ namespace ChatService.Hubs
     {
         private readonly IUserService _userService;
         private readonly IMessageService _messageService;
+        private readonly IMatchmakingClient _matchmakingClient;
 
-        public ChatHub(IUserService userService, IMessageService messageService)
+        public ChatHub(IUserService userService, IMessageService messageService, IMatchmakingClient matchmakingClient)
         {
             _userService = userService;
             _messageService = messageService;
+            _matchmakingClient = matchmakingClient;
         }
 
         public override async Task OnConnectedAsync()
         {
             var user = Context.GetHttpContext()?.Request.Query["user"].ToString();
-            var gameId = Context.GetHttpContext()?.Request.Query["gameId"].ToString();
 
-            if (!string.IsNullOrEmpty(user) && !string.IsNullOrEmpty(gameId))
+            if (string.IsNullOrEmpty(user))
             {
-                _userService.AddUser(Context.ConnectionId, user, gameId);
-
-                await Clients.Group(gameId).SendAsync("UpdateUserList", _userService.GetOnlineUsers(gameId));
-
-                await Groups.AddToGroupAsync(Context.ConnectionId, gameId);
+                await base.OnConnectedAsync();
+                return;
             }
+
+            string? gameId = null;
+            int attempts = 0;
+            while (gameId == null && attempts < 30)
+            {
+                gameId = await _matchmakingClient.GetMatchIdForPlayerAsync(user);
+                if (gameId == null)
+                {
+                    await Task.Delay(1000);
+                    attempts++;
+                }
+            }
+
+            if (gameId == null)
+            {
+                await Clients.Caller.SendAsync("NoMatchFound");
+                await base.OnConnectedAsync();
+                return;
+            }
+
+            _userService.AddUser(Context.ConnectionId, user, gameId);
+            await Groups.AddToGroupAsync(Context.ConnectionId, gameId);
+            await Clients.Group(gameId).SendAsync("UpdateUserList", _userService.GetOnlineUsers(gameId));
 
             await base.OnConnectedAsync();
         }
+
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
@@ -49,14 +71,17 @@ namespace ChatService.Hubs
             await base.OnDisconnectedAsync(exception);
         }
 
-        public async Task SendMessageToGame(string gameId, string user, string message)
+
+        public async Task SendMessageToGame(string message)
         {
-            if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(user) || string.IsNullOrWhiteSpace(gameId))
-                return;
+            var userTuple = _userService.GetUserByConnectionId(Context.ConnectionId);
+            if (userTuple == null) return; 
+
+            var (username, gameId) = userTuple.Value;
 
             var msg = new Message
             {
-                Sender = user,
+                Sender = username,
                 Content = message,
                 SentAt = DateTime.UtcNow,
                 GameId = gameId
@@ -66,6 +91,8 @@ namespace ChatService.Hubs
 
             await Clients.Group(gameId).SendAsync("ReceiveMessage", msg);
         }
+
+
 
         public async Task LoadOlderMessages(string gameId, int count, DateTime? before = null)
         {

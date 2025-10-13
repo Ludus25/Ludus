@@ -8,5 +8,6 @@ namespace ChatService.Services
         void RemoveUser(string connectionId);
         List<string> GetOnlineUsers(string gameId);
         string? GetGameId(string connectionId);
+        (string Username, string GameId)? GetUserByConnectionId(string connectionId);
     }
 }

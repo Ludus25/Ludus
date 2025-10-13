@@ -36,5 +36,15 @@ namespace ChatService.Services
         {
             return _onlineUsers.TryGetValue(connectionId, out var userInfo) ? userInfo.GameId : null;
         }
+
+        public (string Username, string GameId)? GetUserByConnectionId(string connectionId)
+        {
+            if (_onlineUsers.TryGetValue(connectionId, out var userInfo))
+            {
+                return (userInfo.Username, userInfo.GameId);
+            }
+            return null;
+        }
     }
+
 }

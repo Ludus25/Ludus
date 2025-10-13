@@ -10,7 +10,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("CorsPolicy", builder =>
     {
         builder
-            .WithOrigins("http://localhost:5173") 
+            .WithOrigins("http://localhost:5173")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -19,11 +19,13 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddSignalR();
 
-/*builder.Services.AddDbContext<ChatDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));*/
-
 builder.Services.AddDbContext<ChatDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddHttpClient<IMatchmakingClient, MatchmakingClient>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:5002"); 
+});
 
 
 builder.Services.AddSingleton<IUserService, UserService>();

@@ -4,9 +4,7 @@ import { useChat } from '../model/useChat';
 
 const { Title } = Typography;
 
-type OnlineUsersProps = {
-  users: string[]
-};
+type OnlineUsersProps = { users: string[] };
 
 const OnlineUsers: React.FC<OnlineUsersProps> = ({ users }) => (
   <Space direction="vertical" size="small" style={{ width: '100%' }}>
@@ -42,18 +40,23 @@ const OnlineUsers: React.FC<OnlineUsersProps> = ({ users }) => (
 
 export default function ChatPage() {
   const [usernameInput, setUsernameInput] = useState('');
-  const [gameIdInput, setGameIdInput] = useState('');
   const [username, setUsername] = useState('');
-  const [gameId, setGameId] = useState('');
   const [message, setMessage] = useState('');
+  const [gameId, setGameId] = useState('');
 
-  const { messages, onlineUsers, sendMessage, error, chatEndRef, loadOlderMessages, hasMore } =
-    useChat(username, gameId);
+  const { messages, onlineUsers, sendMessage, error, chatEndRef, hasMore } = useChat(username, gameId);
 
-  const handleJoin = () => {
-    if (usernameInput.trim() && gameIdInput.trim()) {
-      setUsername(usernameInput.trim());
-      setGameId(gameIdInput.trim());
+  const handleJoin = async () => {
+    if (!usernameInput.trim()) return;
+    setUsername(usernameInput.trim());
+
+    try {
+      const res = await fetch(`http://localhost:5002/api/matchmaking/status/${usernameInput}`);
+      if (!res.ok) throw new Error("Ne mogu da dobijem gameId");
+      const data = await res.json();
+      setGameId(data.gameId); // sačuvaj gameId
+    } catch (err) {
+      console.error("Greška pri dobijanju igre:", err);
     }
   };
 
@@ -64,7 +67,7 @@ export default function ChatPage() {
     }
   };
 
-  if (!username || !gameId) {
+  if (!username) {
     return (
       <Space direction="vertical" size="middle" style={{ width: '100%', padding: 20 }}>
         <Card title="Pridruži se Chat Sobi" style={{ maxWidth: 400, margin: 'auto' }}>
@@ -72,13 +75,6 @@ export default function ChatPage() {
             placeholder="Unesi ime"
             value={usernameInput}
             onChange={(e) => setUsernameInput(e.target.value)}
-            onPressEnter={handleJoin}
-            style={{ marginBottom: 10 }}
-          />
-          <Input
-            placeholder="Unesi gameId"
-            value={gameIdInput}
-            onChange={(e) => setGameIdInput(e.target.value)}
             onPressEnter={handleJoin}
             style={{ marginBottom: 10 }}
           />
@@ -92,7 +88,6 @@ export default function ChatPage() {
 
   return (
     <div style={{ display: 'flex', height: '100vh', padding: 20, gap: 20 }}>
-      {/* Sidebar - online users */}
       <Card
         title="Online korisnici"
         style={{ width: 250, flexShrink: 0, overflowY: 'auto', height: '100%' }}
@@ -101,20 +96,17 @@ export default function ChatPage() {
         <OnlineUsers users={onlineUsers} />
       </Card>
 
-      {/* Chat area */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', maxWidth: 800 }}>
-        <Title level={3}>Chat soba: {gameId}</Title>
+        <Title level={3}>Chat soba: Traži se igra...</Title>
         {error && <Alert message={error} type="error" style={{ marginBottom: 10 }} />}
 
         <Card style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: 10 }}>
-          {/* Load older messages button */}
           {hasMore && (
-            <Button onClick={loadOlderMessages} style={{ marginBottom: 10 }}>
+            <Button onClick={() => {}} style={{ marginBottom: 10 }}>
               Učitaj starije poruke
             </Button>
           )}
 
-          {/* Poruke */}
           <div
             style={{
               flex: 1,
@@ -157,7 +149,6 @@ export default function ChatPage() {
             <div ref={chatEndRef} />
           </div>
 
-          {/* Input */}
           <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
             <Input
               placeholder="Unesi poruku..."
