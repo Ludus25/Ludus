@@ -6,8 +6,6 @@ import Verify2FAModal from '../ui/verify2fa'
 import { useAuth } from '../model/useAuth'
 import '../pages/auth.css'
 
-
-
 const AuthPage: React.FC = () => {
   const { register, login, verify2FA, loading, error } = useAuth()
   const navigate = useNavigate()
@@ -17,74 +15,79 @@ const AuthPage: React.FC = () => {
   const [verifyError, setVerifyError] = useState<string | null>(null)
   const [verifyLoading, setVerifyLoading] = useState(false)
 
-  // --- LOGIN ---
+  // --- LOGIN (uvek ide na 2FA) ---
   const handleLogin = async (email: string, password: string) => {
     const resp = await login({ email, password })
     console.log('Login response:', resp)
 
     if (resp?.requires2FA) {
+      // Čekamo verifikaciju
       setEmailFor2FA(email)
-      setShowVerify(true) 
+      setShowVerify(true)
     } else {
-      alert(resp.message ?? 'Login failed. 2FA required.')
+      // Ako login API ne vraća requires2FA, tretiraj to kao grešku
+      alert('2FA is required. Please try login again.')
     }
+  }
+
+  // --- VERIFY (posle unosa 2FA koda) ---
+  const handleVerify = async (code: string) => {
+    if (!emailFor2FA) return
+    setVerifyError(null)
+    setVerifyLoading(true)
+    try {
+      const resp = await verify2FA({ email: emailFor2FA, code })
+      console.log('Verify2FA response:', resp)
+
+      if (resp?.token) {
+        // Uspešna verifikacija
+        localStorage.setItem('token', resp.token)
+        
+        // Dispečuj event da bi se ProtectedRoute components ažurirao
+        window.dispatchEvent(new Event('authChanged'))
+        
+        setShowVerify(false)
+        navigate('/dashboard')
+      } else {
+        setVerifyError(resp.message ?? 'Verification failed')
+      }
+    } catch (err) {
+      setVerifyError('Verification failed')
+    } finally {
+      setVerifyLoading(false)
+    }
+  }
+
+  const handleCancelVerify = () => {
+    setShowVerify(false)
   }
 
   // --- REGISTER ---
   const handleRegister = async (data: {
-  email: string
-  password: string
-  confirmPassword: string
-  mlb: string
-  firstName: string
-  lastName: string
-}) => {
-  const resp = await register({
-    email: data.email,
-    password: data.password,
-    confirmPassword: data.confirmPassword,
-    mlb: data.mlb,
-    firstName: data.firstName,
-    lastName: data.lastName
-  })
+    email: string
+    password: string
+    confirmPassword: string
+    mlb: string
+    firstName: string
+    lastName: string
+  }) => {
+    const resp = await register({
+      email: data.email,
+      password: data.password,
+      confirmPassword: data.confirmPassword,
+      mlb: data.mlb,
+      firstName: data.firstName,
+      lastName: data.lastName
+    })
 
-  if (resp.success) {
-    alert('Registration successful! Please log in.')
-    setMode('login') 
-    navigate('/auth')
-  } else {
-    console.error('Registration error:', resp.message)
-    alert(resp.message ?? 'Registration failed')
-  }
-}
-
-
-const handleVerify = async (code: string) => {
-  if (!emailFor2FA) return
-  setVerifyError(null)
-  setVerifyLoading(true)
-  try {
-    const resp = await verify2FA({ email: emailFor2FA, code })
-    //if ((resp.success ?? true) && resp.token)
-    if (resp?.token) {
-      localStorage.setItem('token', resp.token)
-      setShowVerify(false)
-      alert('2FA verification successful! Logged in.')
-      navigate('/dashboard')
-
+    if (resp.success) {
+      alert('Registration successful! Please log in.')
+      setMode('login')
+      navigate('/auth')
     } else {
-      setVerifyError(resp.message ?? 'Verification failed')
+      console.error('Registration error:', resp.message)
+      alert(resp.message ?? 'Registration failed')
     }
-  } catch (err) {
-    setVerifyError('Verification failed')
-  } finally {
-    setVerifyLoading(false)
-  }
-}
-
-
-  const handleCancelVerify = () => {
-    setShowVerify(false)
   }
 
   return (
