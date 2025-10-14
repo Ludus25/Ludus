@@ -6,20 +6,23 @@ import { isLoggedIn } from '../shared/utils/auth.ts'
 import AuthPage from "../features/authentication/pages/authPage";
 import Header from '../features/authentication/ui/header.tsx'
 import React, { useState, useEffect } from 'react';
+import UsersPage from '../features/admin/pages/userPages.tsx';
+import AdminRoute from '../features/admin/route/adminRoute.tsx';
+
 
 
 const ProtectedRoute: React.FC<{ element: React.ReactElement }> = ({ element }) => {
   const [isAuth, setIsAuth] = useState(isLoggedIn());
 
   useEffect(() => {
-    // Čini se promenama u tokenu
+    
     const handleStorageChange = () => {
       setIsAuth(isLoggedIn());
     };
 
     window.addEventListener('storage', handleStorageChange);
     
-    // Takođe prosledi custom event ako postoji
+    
     window.addEventListener('authChanged', handleStorageChange);
 
     return () => {
@@ -53,6 +56,7 @@ export default function App() {
           <Route path="/game/:gameId" element={<GamePage />} />
           <Route path="/game" element={<GamePage />} />
           <Route path="/matchmaking" element={<MatchmakingPage />} />
+          <Route path="/users" element={<AdminRoute element={<UsersPage />} />} />
           <Route path="*" element={<Navigate to="/auth" />} />
         </Routes>
       </div>

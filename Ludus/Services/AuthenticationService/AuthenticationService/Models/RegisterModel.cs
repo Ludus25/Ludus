@@ -14,7 +14,7 @@ namespace AuthenticationService.Models
         public string Password { get; set; }
 
         [DataType(DataType.Password)]
-        [Compare("Password", ErrorMessage = "Lozinke se ne poklapaju.")]
+        [Compare("Password", ErrorMessage = "The passwords are different")]
         public string ConfirmPassword { get; set; }
 
         [Required]

@@ -1,30 +1,46 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from 'antd';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { isLoggedIn, logout } from '../../../shared/utils/auth.ts';
+import { isLoggedIn, logout, getUserRole } from '../../../shared/utils/auth.ts';
 
 const Header: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(isLoggedIn());
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     setIsAuthenticated(isLoggedIn());
+    const role = getUserRole();
+    setIsAdmin(role === 'Admin');
   }, [location]);
 
   const handleLogout = () => {
     logout();
-    navigate('/auth'); // Preusmeravanje na stranicu za prijavu
+    navigate('/auth');
+  };
+
+  const handleViewUsers = () => {
+    navigate('/users'); 
   };
 
   return (
     <header style={headerStyle}>
       <div style={logoStyle}>Ludus</div>
-      {isAuthenticated && (
-        <Button type="primary" danger onClick={handleLogout}>
-          Logout
-        </Button>
-      )}
+
+      <div style={{ display: 'flex', gap: '10px' }}>
+        {isAuthenticated && isAdmin && (
+          <Button type="default" onClick={handleViewUsers}>
+            Users
+          </Button>
+        )}
+
+        {isAuthenticated && (
+          <Button type="primary" danger onClick={handleLogout}>
+            Logout
+          </Button>
+        )}
+      </div>
     </header>
   );
 };

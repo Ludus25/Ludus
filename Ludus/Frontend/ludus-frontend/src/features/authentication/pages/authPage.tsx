@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Modal } from 'antd'
 import LoginForm from '../ui/loginForm'
 import RegisterForm from '../ui/registrationForm'
 import Verify2FAModal from '../ui/verify2fa'
@@ -9,28 +10,48 @@ import '../pages/auth.css'
 const AuthPage: React.FC = () => {
   const { register, login, verify2FA, loading, error } = useAuth()
   const navigate = useNavigate()
+  
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [emailFor2FA, setEmailFor2FA] = useState<string | null>(null)
   const [showVerify, setShowVerify] = useState(false)
   const [verifyError, setVerifyError] = useState<string | null>(null)
   const [verifyLoading, setVerifyLoading] = useState(false)
+  
+  const [modalVisible, setModalVisible] = useState(false)
+  const [modalTitle, setModalTitle] = useState('')
+  const [modalMessage, setModalMessage] = useState('')
+  const [modalType, setModalType] = useState<'success' | 'error'>('success')
 
-  // --- LOGIN (uvek ide na 2FA) ---
+  const showModal = (title: string, msg: string, type: 'success' | 'error', callback?: () => void) => {
+    setModalTitle(title)
+    setModalMessage(msg)
+    setModalType(type)
+    setModalVisible(true)
+    
+    if (type === 'success' && callback) {
+      setTimeout(() => {
+        setModalVisible(false)
+        callback()
+      }, 2000)
+    }
+  }
+
+  const handleModalClose = () => {
+    setModalVisible(false)
+  }
+
   const handleLogin = async (email: string, password: string) => {
     const resp = await login({ email, password })
     console.log('Login response:', resp)
 
     if (resp?.requires2FA) {
-      // Čekamo verifikaciju
       setEmailFor2FA(email)
       setShowVerify(true)
     } else {
-      // Ako login API ne vraća requires2FA, tretiraj to kao grešku
-      alert('2FA is required. Please try login again.')
+      showModal('Error', resp?.message ?? '2FA is required. Please try login again.', 'error')
     }
   }
 
-  // --- VERIFY (posle unosa 2FA koda) ---
   const handleVerify = async (code: string) => {
     if (!emailFor2FA) return
     setVerifyError(null)
@@ -40,19 +61,26 @@ const AuthPage: React.FC = () => {
       console.log('Verify2FA response:', resp)
 
       if (resp?.token) {
-        // Uspešna verifikacija
         localStorage.setItem('token', resp.token)
-        
-        // Dispečuj event da bi se ProtectedRoute components ažurirao
         window.dispatchEvent(new Event('authChanged'))
         
-        setShowVerify(false)
-        navigate('/dashboard')
+        showModal(
+          'Success',
+          'Login successful!',
+          'success',
+          () => {
+            setShowVerify(false)
+            navigate('/dashboard')
+          }
+        )
       } else {
-        setVerifyError(resp.message ?? 'Verification failed')
+        const errorMsg = resp?.message ?? 'Verification failed. Please try again.'
+        setVerifyError(errorMsg)
+        showModal('Error', errorMsg, 'error')
       }
     } catch (err) {
-      setVerifyError('Verification failed')
+      setVerifyError('Verification failed. Please try again.')
+      showModal('Error', 'Verification failed. Please try again.', 'error')
     } finally {
       setVerifyLoading(false)
     }
@@ -80,13 +108,18 @@ const AuthPage: React.FC = () => {
       lastName: data.lastName
     })
 
-    if (resp.success) {
-      alert('Registration successful! Please log in.')
-      setMode('login')
-      navigate('/auth')
+    if (resp?.success) {
+      showModal(
+        'Successful Registration',
+        '',
+        'success',
+        () => {
+          setMode('login')
+          navigate('/auth')
+        }
+      )
     } else {
-      console.error('Registration error:', resp.message)
-      alert(resp.message ?? 'Registration failed')
+      showModal('Failed Registration', '', 'error')
     }
   }
 
@@ -124,6 +157,24 @@ const AuthPage: React.FC = () => {
             error={verifyError}
           />
         )}
+
+        <Modal
+          title={modalTitle}
+          open={modalVisible}
+          onOk={handleModalClose}
+          onCancel={handleModalClose}
+          centered
+          okText="OK"
+          cancelButtonProps={{ style: { display: 'none' } }}
+        >
+          <p style={{
+            color: modalType === 'success' ? '#52c41a' : '#ff4d4f',
+            fontSize: '16px',
+            fontWeight: '500'
+          }}>
+            {modalMessage}
+          </p>
+        </Modal>
       </div>
     </div>
   )

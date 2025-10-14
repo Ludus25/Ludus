@@ -6,10 +6,9 @@ interface JwtPayload {
 
 export const getToken = () => localStorage.getItem('token')
 
-//export const isLoggedIn = () => !!getToken()
 export function isLoggedIn(): boolean {
   const token = localStorage.getItem('token');
-  return !!token; // Vraća true ako token postoji
+  return !!token; 
 }
 
 export const logout = () => {
@@ -32,3 +31,18 @@ export const isTokenExpired = () => {
     return true 
   }
 }
+
+
+
+export function getUserRole(): string | null {
+  const token = localStorage.getItem('token')
+  if (!token) return null
+
+  try {
+    const decoded: any = jwtDecode(token)
+    return decoded['role'] || decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || null
+  } catch {
+    return null
+  }
+}
+

@@ -36,7 +36,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, loading, error }) => {
         Log In
       </button>
       <div className="forgot-password">
-        <a href="#" onClick={e => { e.preventDefault(); /* handle forgot password */ }}>
+        <a href="#" onClick={e => { e.preventDefault();  }}>
           Forgot password?
         </a>
       </div>

@@ -113,6 +113,19 @@
             "UpstreamHttpMethod": [ "PUT" ]
         },
         {
+            "DownstreamPathTemplate": "/api/test/names",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "authenticationservice",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/test/names",
+            "UpstreamHttpMethod": [ "GET" ]
+        },
+
+        {
             "DownstreamPathTemplate": "/api/matchmaking/join",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
