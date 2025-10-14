@@ -1,0 +1,105 @@
+/* styles/auth.css */
+
+body {
+  background-color: #f0f2f5;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.auth-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.auth-box {
+  background: white;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+}
+
+.auth-box h1 {
+  margin-bottom: 24px;
+  font-size: 28px;
+  font-weight: normal;
+  color: #1877f2;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-form input {
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  outline: none;
+}
+
+.auth-form input:focus {
+  border-color: #1877f2;
+}
+
+.auth-form button {
+  padding: 12px;
+  font-size: 18px;
+  background-color: #1877f2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.auth-form button:hover {
+  background-color: #165ec8;
+}
+
+.forgot-password {
+  margin-top: -8px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.forgot-password a {
+  text-decoration: none;
+  color: #1877f2;
+}
+
+.forgot-password a:hover {
+  text-decoration: underline;
+}
+
+.create-account {
+  margin-top: 16px;
+  font-size: 16px;
+}
+
+.create-account button {
+  background-color: #42b72a;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.create-account button:hover {
+  background-color: #36a420;
+}
+
+.error-message {
+  color: red;
+  font-size: 0.9rem;
+  text-align: center;
+}

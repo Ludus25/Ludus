@@ -1,6 +1,8 @@
 using MatchmakingService.Entities;
 using MatchmakingService.Application.Services;
 using MatchmakingService.Infrastructure.Grpc;
+using MatchmakingService.Hubs;
+using Microsoft.AspNetCore.SignalR;
 using System.Linq;
 
 namespace MatchmakingService.Application.Commands
@@ -9,19 +11,19 @@ namespace MatchmakingService.Application.Commands
     {
         private readonly IMatchRepository _repo;
         private readonly IEventPublisher _publisher;
-        private readonly UserGrpcClient? _userClient;
         private readonly GameGrpcClient? _gameClient;
+        private readonly IHubContext<MatchmakingHub>? _hubContext;
 
         public JoinCommandHandler(
             IMatchRepository repo, 
             IEventPublisher publisher, 
-            UserGrpcClient? userClient = null, 
-            GameGrpcClient? gameClient = null)
+            GameGrpcClient? gameClient = null,
+            IHubContext<MatchmakingHub>? hubContext = null)
         {
             _repo = repo;
             _publisher = publisher;
-            _userClient = userClient;
             _gameClient = gameClient;
+            _hubContext = hubContext;
         }
 
         public async Task<string> HandleAsync(JoinCommand cmd)
@@ -29,21 +31,9 @@ namespace MatchmakingService.Application.Commands
             if (_repo.IsPlayerInQueue(cmd.PlayerId))
                 return "Player already in queue";
 
-            // Get rating from gRPC service if available, otherwise use provided rating
+            // Koristi rating direktno iz request-a
             int rating = cmd.Rating;
-            if (_userClient != null)
-            {
-                var fetchedRating = await _userClient.GetRatingAsync(cmd.PlayerId);
-                if (fetchedRating.HasValue)
-                {
-                    rating = fetchedRating.Value;
-                    Console.WriteLine($"[GRPC] Retrieved rating {rating} for player {cmd.PlayerId}");
-                }
-                else
-                {
-                    Console.WriteLine($"[GRPC] Failed to retrieve rating for player {cmd.PlayerId}, using provided rating {rating}");
-                }
-            }
+            Console.WriteLine($"[MATCHMAKING] Player {cmd.PlayerId} joining with rating {rating}");
 
             var player = new PlayerInQueue(cmd.PlayerId, rating);
             _repo.EnqueuePlayer(player);
@@ -59,12 +49,44 @@ namespace MatchmakingService.Application.Commands
                 var match = new Match(players);
                 _repo.AddMatch(match);
 
+                Console.WriteLine($"[MATCHMAKING] Match found! MatchId: {match.MatchId}");
+                Console.WriteLine($"[MATCHMAKING] Players: {string.Join(", ", players.Select(p => $"{p.PlayerId}({p.Rating})"))}");
+
                 // Try gRPC first
                 string? gameUrl = null;
                 if (_gameClient != null)
                 {
+                    Console.WriteLine($"[MATCHMAKING] Calling gRPC StartGame...");
                     var response = await _gameClient.StartGameAsync(match.MatchId, players.ToList());
                     gameUrl = response?.GameServerUrl;
+                    
+                    if (gameUrl != null)
+                    {
+                        Console.WriteLine($"[MATCHMAKING] gRPC Success! GameServerUrl: {gameUrl}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"[MATCHMAKING] gRPC returned null, falling back to RabbitMQ");
+                    }
+                }
+
+                // Notifikuj OBA igrača preko SignalR
+                if (_hubContext != null)
+                {
+                    foreach (var p in players)
+                    {
+                        var connectionId = MatchmakingHub.GetConnectionId(p.PlayerId);
+                        if (connectionId != null)
+                        {
+                            await _hubContext.Clients.Client(connectionId).SendAsync("MatchFound", new
+                            {
+                                MatchId = match.MatchId,
+                                GameUrl = gameUrl,
+                                Players = players.Select(pl => pl.PlayerId).ToArray()
+                            });
+                            Console.WriteLine($"[SIGNALR] Notified player {p.PlayerId}");
+                        }
+                    }
                 }
 
                 // Publish event to RabbitMQ (fallback or parallel notification)

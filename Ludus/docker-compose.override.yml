@@ -1,4 +1,3 @@
-
 services:
   sqlserver:
     container_name: ludus-sqlserver
@@ -35,12 +34,17 @@ services:
     container_name: xogame.api
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_HTTP_PORTS=8080
       - "RedisCacheSettings:ConnectionString=xogamedb:6379"
+      - "Kestrel__Endpoints__Http__Url=http://+:8080"
+      - "Kestrel__Endpoints__Http__Protocols=Http1"
+      - "Kestrel__Endpoints__Grpc__Url=http://+:8081"
+      - "Kestrel__Endpoints__Grpc__Protocols=Http2"
+      - "GameFrontendUrl=http://localhost:5173"
     depends_on:
       - xogamedb
     ports:
-      - "8001:8080"
+      - "8001:8080"  # REST API (HTTP/1.1)
+      - "8082:8081"  # gRPC (HTTP/2)
 
   authenticationservice:
     container_name: ludus-authenticationservice
@@ -52,7 +56,6 @@ services:
       - sqlserver
     ports:
       - "7000:8080"
-
 
   ludusgateways:
     environment:
@@ -87,8 +90,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - RABBIT_HOST=rabbitmq
-      - USER_GRPC_ADDRESS=http://user-service:5001
-      - GAME_GRPC_ADDRESS=http://xogameservice.api:8080
+      - GAME_GRPC_ADDRESS=http://xogameservice.api:8081
     depends_on:
       - rabbitmq
       - xogameservice.api
@@ -104,3 +106,4 @@ services:
 volumes:
   postgres-data:
   mssql_data:
+

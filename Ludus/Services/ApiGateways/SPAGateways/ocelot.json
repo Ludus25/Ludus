@@ -10,11 +10,7 @@
                 }
             ],
             "UpstreamPathTemplate": "/xo-game",
-            "UpstreamHttpMethod": [ "POST" ],
-            "AuthenticationOptions": {
-                "AuthenticationProviderKey": "LudusAuth",
-                "AllowedScopes": []
-            }
+            "UpstreamHttpMethod": [ "POST" ]
         },
         {
             "DownstreamPathTemplate": "/api/v1/xo-game/{everything}",
@@ -26,11 +22,7 @@
                 }
             ],
             "UpstreamPathTemplate": "/xo-game/{everything}",
-            "UpstreamHttpMethod": [ "GET", "POST", "PUT" ],
-            "AuthenticationOptions": {
-                "AuthenticationProviderKey": "LudusAuth",
-                "AllowedScopes": []
-            }
+            "UpstreamHttpMethod": [ "GET", "POST", "PUT" ]
         },
         {
             "DownstreamPathTemplate": "/gamehub",
@@ -42,11 +34,7 @@
                 }
             ],
             "UpstreamPathTemplate": "/ws/gamehub",
-            "UpstreamHttpMethod": [ "GET" ],
-            "AuthenticationOptions": {
-                "AuthenticationProviderKey": "LudusAuth",
-                "AllowedScopes": []
-            }
+            "UpstreamHttpMethod": [ "GET" ]
         },
         {
             "DownstreamPathTemplate": "/gamehub/negotiate",
@@ -58,11 +46,7 @@
                 }
             ],
             "UpstreamPathTemplate": "/ws/gamehub/negotiate",
-            "UpstreamHttpMethod": [ "POST" ],
-            "AuthenticationOptions": {
-                "AuthenticationProviderKey": "LudusAuth",
-                "AllowedScopes": []
-            }
+            "UpstreamHttpMethod": [ "POST" ]
         },
         {
             "DownstreamPathTemplate": "/api/auth/register",
@@ -111,6 +95,62 @@
             ],
             "UpstreamPathTemplate": "/auth/change-password",
             "UpstreamHttpMethod": [ "PUT" ]
+        },
+        {
+            "DownstreamPathTemplate": "/api/matchmaking/join",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "matchmakingservice",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/matchmaking/join",
+            "UpstreamHttpMethod": [ "POST" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "LudusAuth",
+                "AllowedScopes": []
+            }
+        },
+        {
+            "DownstreamPathTemplate": "/api/matchmaking/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "matchmakingservice",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/matchmaking/{everything}",
+            "UpstreamHttpMethod": [ "GET", "POST" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "LudusAuth",
+                "AllowedScopes": []
+            }
+        },
+        {
+            "DownstreamPathTemplate": "/matchmakingHub",
+            "DownstreamScheme": "ws",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "matchmakingservice",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/ws/matchmakingHub",
+            "UpstreamHttpMethod": [ "GET" ]
+        },
+        {
+            "DownstreamPathTemplate": "/matchmakingHub/negotiate",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "matchmakingservice",
+                    "Port": 8080
+                }
+            ],
+            "UpstreamPathTemplate": "/ws/matchmakingHub/negotiate",
+            "UpstreamHttpMethod": [ "POST" ]
         }
     ],
     "GlobalConfiguration": {

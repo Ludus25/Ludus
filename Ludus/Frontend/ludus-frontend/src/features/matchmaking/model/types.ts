@@ -6,6 +6,7 @@ export interface JoinMatchRequest {
 export interface MatchStatus {
   status: 'not_found' | 'searching' | 'matched';
   matchId?: string;
+  gameUrl?: string;
   players?: string[];
 }
 
