@@ -11,38 +11,21 @@ namespace ChatService.Hubs
     {
         private readonly IUserService _userService;
         private readonly IMessageService _messageService;
-        private readonly IMatchmakingClient _matchmakingClient;
 
-        public ChatHub(IUserService userService, IMessageService messageService, IMatchmakingClient matchmakingClient)
+
+        public ChatHub(IUserService userService, IMessageService messageService)
         {
             _userService = userService;
             _messageService = messageService;
-            _matchmakingClient = matchmakingClient;
         }
+
 
         public override async Task OnConnectedAsync()
         {
             var user = Context.GetHttpContext()?.Request.Query["user"].ToString();
+            var gameId = Context.GetHttpContext()?.Request.Query["gameId"].ToString();
 
-            if (string.IsNullOrEmpty(user))
-            {
-                await base.OnConnectedAsync();
-                return;
-            }
-
-            string? gameId = null;
-            int attempts = 0;
-            while (gameId == null && attempts < 30)
-            {
-                gameId = await _matchmakingClient.GetMatchIdForPlayerAsync(user);
-                if (gameId == null)
-                {
-                    await Task.Delay(1000);
-                    attempts++;
-                }
-            }
-
-            if (gameId == null)
+            if (string.IsNullOrEmpty(user) || string.IsNullOrEmpty(gameId))
             {
                 await Clients.Caller.SendAsync("NoMatchFound");
                 await base.OnConnectedAsync();
@@ -55,6 +38,7 @@ namespace ChatService.Hubs
 
             await base.OnConnectedAsync();
         }
+
 
 
         public override async Task OnDisconnectedAsync(Exception? exception)

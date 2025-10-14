@@ -22,11 +22,6 @@ builder.Services.AddSignalR();
 builder.Services.AddDbContext<ChatDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddHttpClient<IMatchmakingClient, MatchmakingClient>(client =>
-{
-    client.BaseAddress = new Uri("http://localhost:5002"); 
-});
-
 
 builder.Services.AddSingleton<IUserService, UserService>();
 builder.Services.AddScoped<IMessageService, MessageService>();
