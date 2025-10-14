@@ -26,17 +26,6 @@ services:
     build:
       context: .
       dockerfile: Services/XOGameService/XOGameService.API/Dockerfile
-
-  gamehistoryservice:
-    image: ${DOCKER_REGISTRY-}gamehistoryservice
-    build:
-      context: .
-      dockerfile: Services/GameHistoryService/Dockerfile
-
-volumes:
-  postgres_data:
-  pgadmin_data:
-  rabbitmq_data:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
@@ -44,6 +33,12 @@ volumes:
       - xogamedb
     ports:
       - "8001:8080"
+
+  gamehistoryservice:
+    image: ${DOCKER_REGISTRY-}gamehistoryservice
+    build:
+      context: .
+      dockerfile: Services/GameHistoryService/Dockerfile
 
   authenticationservice:
     image: authenticationservice
@@ -67,7 +62,6 @@ volumes:
       context: .
       dockerfile: Services/ApiGateways/SPAGateways/Dockerfile
 
-
   matchmakingservice:
     image: ${DOCKER_REGISTRY-}matchmakingservice
     build:
@@ -76,6 +70,6 @@ volumes:
 
 volumes:
   mssql_data:
-
-
-
+  postgres_data:
+  pgadmin_data:
+  rabbitmq_data:
