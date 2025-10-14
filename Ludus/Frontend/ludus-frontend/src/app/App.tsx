@@ -38,14 +38,11 @@ export default function App() {
         }}
       >
         <Header />
-        <h1>Ludus Frontend</h1>
 
         <Routes>
-          {/* Public routes */}
           <Route path="/" element={<Navigate to="/auth" replace />} />
           <Route path="/auth" element={<AuthPage />} />
 
-          {/* Protected routes */}
           <Route 
             path="/dashboard" 
             element={<ProtectedRoute element={<DashboardPage />} />} 
@@ -63,7 +60,6 @@ export default function App() {
             element={<ProtectedRoute element={<GamePage />} />} 
           />
 
-          {/* Catch all */}
           <Route path="*" element={<Navigate to="/auth" replace />} />
         </Routes>
       </div>
