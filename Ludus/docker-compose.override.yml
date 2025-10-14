@@ -22,14 +22,16 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - "RedisCacheSettings:ConnectionString=xogamedb:6379"
-      - ASPNETCORE_URLS=http://+:8080
-      - ASPNETCORE_Kestrel__Endpoints__Grpc__Protocols=Http2
-      - ASPNETCORE_Kestrel__Endpoints__Grpc__Url=http://+:8080
-      - ASPNETCORE_Kestrel__EndpointDefaults__Protocols=Http1AndHttp2
+      - "Kestrel__Endpoints__Http__Url=http://+:8080"
+      - "Kestrel__Endpoints__Http__Protocols=Http1"
+      - "Kestrel__Endpoints__Grpc__Url=http://+:8081"
+      - "Kestrel__Endpoints__Grpc__Protocols=Http2"
+      - "GameFrontendUrl=http://localhost:5173"
     depends_on:
       - xogamedb
     ports:
-      - "8001:8080"
+      - "8001:8080"  # REST API (HTTP/1.1)
+      - "8082:8081"  # gRPC (HTTP/2)
 
   authenticationservice:
     container_name: ludus-authenticationservice
@@ -64,7 +66,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - RABBIT_HOST=rabbitmq
-      - GAME_GRPC_ADDRESS=http://xogameservice.api:8080
+      - GAME_GRPC_ADDRESS=http://xogameservice.api:8081
     depends_on:
       - rabbitmq
       - xogameservice.api

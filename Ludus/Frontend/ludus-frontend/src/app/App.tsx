@@ -1,35 +1,31 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import GamePage from "../features/game/pages/GamePage";
-import DashboardPage from "../features/dashboard/pages/DashboardPage";
-import MatchmakingPage from "../features/matchmaking/pages/MatchmakingPage";
-import { isLoggedIn } from '../shared/utils/auth.ts'
-import AuthPage from "../features/authentication/pages/authPage";
-import Header from '../features/authentication/ui/header.tsx'
-import React, { useState, useEffect } from 'react';
-
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import GamePage from "../features/game/pages/GamePage"
+import DashboardPage from "../features/dashboard/pages/DashboardPage"
+import MatchmakingPage from "../features/matchmaking/pages/MatchmakingPage"
+import AuthPage from "../features/authentication/pages/authPage"
+import Header from '../features/authentication/ui/header'
+import { isLoggedIn } from '../shared/utils/auth'
+import React, { useState, useEffect } from 'react'
 
 const ProtectedRoute: React.FC<{ element: React.ReactElement }> = ({ element }) => {
-  const [isAuth, setIsAuth] = useState(isLoggedIn());
+  const [isAuth, setIsAuth] = useState(isLoggedIn())
 
   useEffect(() => {
-    // Čini se promenama u tokenu
     const handleStorageChange = () => {
-      setIsAuth(isLoggedIn());
-    };
+      setIsAuth(isLoggedIn())
+    }
 
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Takođe prosledi custom event ako postoji
-    window.addEventListener('authChanged', handleStorageChange);
+    window.addEventListener('storage', handleStorageChange)
+    window.addEventListener('authChanged', handleStorageChange)
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('authChanged', handleStorageChange);
-    };
-  }, []);
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('authChanged', handleStorageChange)
+    }
+  }, [])
 
-  return isAuth ? element : <Navigate to="/auth" />;
-};
+  return isAuth ? element : <Navigate to="/auth" replace />
+}
 
 export default function App() {
   return (
@@ -45,17 +41,32 @@ export default function App() {
         <h1>Ludus Frontend</h1>
 
         <Routes>
-          <Route path="/" element={<Navigate to="/auth" />} />
+          {/* Public routes */}
+          <Route path="/" element={<Navigate to="/auth" replace />} />
           <Route path="/auth" element={<AuthPage />} />
-          <Route path="/dashboard" element={<ProtectedRoute element={<DashboardPage />} />} />
-          <Route path="/" element={<Navigate to="/dashboard" />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/game/:gameId" element={<GamePage />} />
-          <Route path="/game" element={<GamePage />} />
-          <Route path="/matchmaking" element={<MatchmakingPage />} />
-          <Route path="*" element={<Navigate to="/auth" />} />
+
+          {/* Protected routes */}
+          <Route 
+            path="/dashboard" 
+            element={<ProtectedRoute element={<DashboardPage />} />} 
+          />
+          <Route 
+            path="/matchmaking" 
+            element={<ProtectedRoute element={<MatchmakingPage />} />} 
+          />
+          <Route 
+            path="/game/:gameId" 
+            element={<ProtectedRoute element={<GamePage />} />} 
+          />
+          <Route 
+            path="/game" 
+            element={<ProtectedRoute element={<GamePage />} />} 
+          />
+
+          {/* Catch all */}
+          <Route path="*" element={<Navigate to="/auth" replace />} />
         </Routes>
       </div>
     </BrowserRouter>
-  );
+  )
 }

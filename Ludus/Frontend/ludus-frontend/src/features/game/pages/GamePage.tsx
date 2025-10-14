@@ -16,7 +16,7 @@ export default function GamePage() {
   const player1FromUrl = searchParams.get('player1');
   const player2FromUrl = searchParams.get('player2');
   
-  const [actingUserId, setActing] = useState(player1FromUrl || 'p1');
+  const [actingUserId, setActing] = useState('');
   const [x, setX] = useState(player1FromUrl || 'p1');
   const [o, setO] = useState(player2FromUrl || 'p2');
   const [gid, setGid] = useState(gameId || '');
@@ -30,14 +30,25 @@ export default function GamePage() {
   }, [gameId]);
 
   useEffect(() => {
-    if (player1FromUrl) {
-      setX(player1FromUrl);
-      setActing(player1FromUrl);
+    const token = localStorage.getItem('token')
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]))
+        const myUserId = payload.sub
+        
+        console.log('[GAME] My userId from token:', myUserId)
+        console.log('[GAME] Player1 from URL:', player1FromUrl)
+        console.log('[GAME] Player2 from URL:', player2FromUrl)
+        
+        setActing(myUserId)
+        
+        if (player1FromUrl) setX(player1FromUrl)
+        if (player2FromUrl) setO(player2FromUrl)
+      } catch (e) {
+        console.error('Failed to decode token', e)
+      }
     }
-    if (player2FromUrl) {
-      setO(player2FromUrl);
-    }
-  }, [player1FromUrl, player2FromUrl]);
+  }, [player1FromUrl, player2FromUrl])
 
   return (
     <Space direction="vertical" size="large" style={{ width: '100%' }}>
@@ -83,6 +94,7 @@ export default function GamePage() {
               style={{ maxWidth: 220 }} 
               value={actingUserId} 
               onChange={e=>setActing(e.target.value)} 
+              disabled
             />
             <Text type="secondary">Trenutno igraš kao: {actingUserId}</Text>
           </Space>
