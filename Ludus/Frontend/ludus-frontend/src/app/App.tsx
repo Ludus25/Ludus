@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import GamePage from "../features/game/pages/GamePage"
 import DashboardPage from "../features/dashboard/pages/DashboardPage"
 import MatchmakingPage from "../features/matchmaking/pages/MatchmakingPage"
+import ChatPage from "../features/chat/pages/ChatPage"; 
 import AuthPage from "../features/authentication/pages/authPage"
 import Header from '../features/authentication/ui/header'
 import { isLoggedIn } from '../shared/utils/auth'
@@ -59,6 +60,11 @@ export default function App() {
             path="/game" 
             element={<ProtectedRoute element={<GamePage />} />} 
           />
+
+	  <Route 
+	    path="/chat" 
+	    element={<ProtectedRoute element={<ChatPage />} />} 
+	  />
 
           <Route path="*" element={<Navigate to="/auth" replace />} />
         </Routes>

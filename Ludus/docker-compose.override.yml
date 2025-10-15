@@ -1,5 +1,4 @@
 services:
-
   rabbitmq:
     container_name: rabbitmq
     restart: always
@@ -68,6 +67,19 @@ services:
     ports:
       - "6379:6379"
 
+  postgres-db:
+    container_name: postgres-db
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: userChat
+      POSTGRES_PASSWORD: passChat
+      POSTGRES_DB: chatdb
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
   xogameservice.api:
     container_name: xogame.api
     environment:
@@ -85,8 +97,8 @@ services:
       rabbitmq:
         condition: service_healthy
     ports:
-      - "8001:8080"  # REST API (HTTP/1.1)
-      - "8082:8081"  # gRPC (HTTP/2)
+      - "8001:8080"
+      - "8082:8081"
 
   authenticationservice:
     container_name: ludus-authenticationservice
@@ -113,6 +125,15 @@ services:
     ports:
       - "8010:8080"
 
+  chatservice:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ConnectionStrings__DefaultConnection=Host=postgres-db;Port=5432;Database=chatdb;Username=userChat;Password=passChat
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+ 
   matchmakingservice:
     container_name: matchmakingservice
     build:
@@ -145,4 +166,11 @@ services:
         condition: service_healthy
     restart: unless-stopped
     ports:
+      - "5672:5672"
+      - "15672:15672"
+
+volumes:
+  postgres-data:
+  mssql_data:
+    
       - "8002:80"

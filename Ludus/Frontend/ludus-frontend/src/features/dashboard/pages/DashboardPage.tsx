@@ -22,6 +22,9 @@ export default function DashboardPage() {
       <button onClick={() => navigate("/matchmaking")}>
         Find Match
       </button>
+      <button onClick={() => navigate("/chat")} style={{ marginLeft: 10 }}>
+  	Chat
+      </button>
     </div>
   );
 }
