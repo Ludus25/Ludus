@@ -10,15 +10,11 @@ namespace ChatService.Hubs
     public class ChatHub : Hub
     {
         private readonly IUserService _userService;
-        private readonly IMessageService _messageService;
 
-
-        public ChatHub(IUserService userService, IMessageService messageService)
+        public ChatHub(IUserService userService)
         {
             _userService = userService;
-            _messageService = messageService;
         }
-
 
         public override async Task OnConnectedAsync()
         {
@@ -39,8 +35,6 @@ namespace ChatService.Hubs
             await base.OnConnectedAsync();
         }
 
-
-
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             var gameId = _userService.GetGameId(Context.ConnectionId);
@@ -55,11 +49,10 @@ namespace ChatService.Hubs
             await base.OnDisconnectedAsync(exception);
         }
 
-
         public async Task SendMessageToGame(string message)
         {
             var userTuple = _userService.GetUserByConnectionId(Context.ConnectionId);
-            if (userTuple == null) return; 
+            if (userTuple == null) return;
 
             var (username, gameId) = userTuple.Value;
 
@@ -71,34 +64,15 @@ namespace ChatService.Hubs
                 GameId = gameId
             };
 
-            await _messageService.AddMessageAsync(msg);
 
             await Clients.Group(gameId).SendAsync("ReceiveMessage", msg);
         }
 
-
-
         public async Task LoadOlderMessages(string gameId, int count, DateTime? before = null)
         {
-            List<Message> olderMessages;
+            List<Message> olderMessages = new List<Message>();
 
-            if (before == null || before == default(DateTime))
-            {
-                olderMessages = await _messageService.GetRecentMessagesAsync(gameId, count);
-            }
-            else
-            {
-                olderMessages = await _messageService.GetOlderMessagesAsync(gameId, count, before.Value);
-            }
-
-            if (olderMessages.Count == 0)
-            {
-                await Clients.Caller.SendAsync("NoMoreMessages");
-            }
-            else
-            {
-                await Clients.Caller.SendAsync("LoadOlderMessages", olderMessages);
-            }
+            await Clients.Caller.SendAsync("LoadOlderMessages", olderMessages);
         }
     }
 }

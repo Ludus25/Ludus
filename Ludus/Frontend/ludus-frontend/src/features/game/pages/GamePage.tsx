@@ -4,6 +4,7 @@ import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
 import Board from '../ui/Board';
 import { isInProgress, statusText } from '../model/types';
 import { Card, Typography, Space, Alert, Button } from 'antd';
+import ChatWidget from '../../chat/ui/ChatWidget';
 
 const { Title } = Typography;
 const empty9 = Array(9).fill(0) as any;
@@ -89,6 +90,10 @@ export default function GamePage() {
           )}
         </Space>
       </Card>
+      
+      {gameId && actingUserId && (
+        <ChatWidget username={actingUserId} gameId={gameId} />
+      )}
     </Space>
   );
 }

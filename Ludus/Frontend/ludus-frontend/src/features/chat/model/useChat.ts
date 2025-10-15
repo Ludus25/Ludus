@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import * as signalR from "@microsoft/signalr";
 
 export const useChat = (username: string, gameId: string) => {
-  const HUB_URL = "http://localhost:5000/chathub";
+  const HUB_URL = import.meta.env.VITE_CHAT_URL || "http://localhost:8080/chathub";
+
 
   const [connection, setConnection] = useState<signalR.HubConnection | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
@@ -11,7 +12,6 @@ export const useChat = (username: string, gameId: string) => {
   const [hasMore, setHasMore] = useState(true);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Start SignalR konekciju **tek kada postoji gameId**
   useEffect(() => {
     if (!username || !gameId) return;
 

@@ -7,9 +7,9 @@ interface Props {
 
 export default function OnlineUsers({ users }: Props) {
   return (
-    <Card title="Online Korisnici" style={{ maxWidth: 300 }}>
+    <Card title="Online Users" style={{ maxWidth: 300 }}>
       {users.length === 0 ? (
-        <Text>Nema korisnika online</Text>
+        <Text>There is no online users</Text>
       ) : (
         <ul>
           {users.map(u => <li key={u}>{u}</li>)}

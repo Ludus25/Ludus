@@ -48,32 +48,31 @@ export default function ChatPage() {
   const { messages, onlineUsers, sendMessage, chatEndRef, loadOlderMessages, hasMore } =
     useChat(username, gameId);
 
-  // 🔁 Polling funkcija za matchmaking status
   const startPolling = (playerId: string) => {
     console.log("🔁 Pokrećem polling za matchmaking status za:", playerId);
     const interval = setInterval(async () => {
       try {
         const res = await fetch(`http://localhost:5002/api/matchmaking/status/${playerId}`);
         if (!res.ok) {
-          console.warn("⚠️ Neuspešan matchmaking status fetch:", res.status);
+          console.warn("Problem with fetching matchmaking service:", res.status);
           return;
         }
 
         const data = await res.json();
-        console.log("📡 Matchmaking status:", data);
+        console.log("Matchmaking status:", data);
 
         if (data.status === "matched" && data.matchId) {
-          console.log("✅ Match pronađen! Match ID:", data.matchId);
+          console.log("Match found! Match ID:", data.matchId);
           setGameId(data.matchId);
           clearInterval(interval);
         } else if (data.status === "searching") {
-          console.log("⏳ Igrač još uvek traži protivnika...");
+          console.log("Finding opponents...");
         } else {
-          console.log("🟡 Status matchmaking-a:", data.status);
+          console.log("Matchmaking status:", data.status);
         }
       } catch (err) {
-        console.error("❌ Greška tokom polling-a:", err);
-        setError("Greška tokom povezivanja na matchmaking servis");
+        console.error("Pooling error:", err);
+        setError("Error while connecting");
         clearInterval(interval);
       }
     }, 2000);
@@ -81,13 +80,12 @@ export default function ChatPage() {
     return () => clearInterval(interval);
   };
 
-  // 🔘 Kada se korisnik pridruži matchmaking-u
   const handleJoin = async () => {
     if (!usernameInput.trim()) return;
     const trimmedUsername = usernameInput.trim();
     setUsername(trimmedUsername);
     setError(null);
-    console.log("👤 Korisnik se pridružuje matchmaking-u:", trimmedUsername);
+    console.log("User joins matchmaking", trimmedUsername);
 
     try {
       const res = await fetch("http://localhost:5002/api/matchmaking/join", {
@@ -100,21 +98,20 @@ export default function ChatPage() {
       });
 
       const data = await res.json();
-      console.log("📨 Odgovor matchmaking join:", data);
+      console.log("Matchmaking join response:", data);
 
-      if (!res.ok) throw new Error(data.message || "Greška pri pridruživanju matchmaking-u");
+      if (!res.ok) throw new Error(data.message || "Joining error");
 
-      // Počni polling
       startPolling(trimmedUsername);
     } catch (err: any) {
-      console.error("❌ Greška u handleJoin:", err);
+      console.error("handleJoin error:", err);
       setError(err.message);
     }
   };
 
   const handleSend = () => {
     if (message.trim()) {
-      console.log("✉️ Šaljem poruku:", message);
+      console.log("Sending message:", message);
       sendMessage(message);
       setMessage("");
     }
@@ -123,7 +120,7 @@ export default function ChatPage() {
   if (!username) {
     return (
       <Space direction="vertical" size="middle" style={{ width: "100%", padding: 20 }}>
-        <Card title="Pridruži se Chat Sobi" style={{ maxWidth: 400, margin: "auto" }}>
+        <Card title="Join room" style={{ maxWidth: 400, margin: "auto" }}>
           <Input
             placeholder="Unesi ime"
             value={usernameInput}
@@ -142,7 +139,7 @@ export default function ChatPage() {
   return (
     <div style={{ display: "flex", height: "100vh", padding: 20, gap: 20 }}>
       <Card
-        title="Online korisnici"
+        title="Online users"
         style={{ width: 250, flexShrink: 0, overflowY: "auto", height: "100%" }}
         bodyStyle={{ padding: 10 }}
       >
@@ -150,16 +147,9 @@ export default function ChatPage() {
       </Card>
 
       <div style={{ flex: 1, display: "flex", flexDirection: "column", maxWidth: 800 }}>
-        <Title level={3}>Chat soba: {gameId ? gameId : "Traži se igra..."}</Title>
         {error && <Alert message={error} type="error" style={{ marginBottom: 10 }} />}
 
         <Card style={{ flex: 1, display: "flex", flexDirection: "column", padding: 10 }}>
-          {hasMore && (
-            <Button onClick={loadOlderMessages} style={{ marginBottom: 10 }}>
-              Učitaj starije poruke
-            </Button>
-          )}
-
           <div
             style={{
               flex: 1,
@@ -204,14 +194,14 @@ export default function ChatPage() {
 
           <div style={{ marginTop: 10, display: "flex", gap: 8 }}>
             <Input
-              placeholder="Unesi poruku..."
+              placeholder="Type message..."
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onPressEnter={handleSend}
               disabled={!gameId}
             />
             <Button type="primary" onClick={handleSend} disabled={!gameId}>
-              Pošalji
+              Send
             </Button>
           </div>
         </Card>
