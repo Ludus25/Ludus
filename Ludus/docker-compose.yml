@@ -1,5 +1,15 @@
 
 services:
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+
+  gamehistoryservicedb:
+    image: postgres
+
+  pgadmin:
+    image: dpage/pgadmin4
+      
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
 
@@ -16,6 +26,17 @@ services:
     build:
       context: .
       dockerfile: Services/XOGameService/XOGameService.API/Dockerfile
+
+  gamehistoryservice:
+    image: ${DOCKER_REGISTRY-}gamehistoryservice
+    build:
+      context: .
+      dockerfile: Services/GameHistoryService/Dockerfile
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+  rabbitmq_data:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
