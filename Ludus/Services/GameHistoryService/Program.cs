@@ -124,7 +124,6 @@ internal class Program
             catch (Exception ex)
             {
                 Console.WriteLine($"[EF MIGRATE] Failed to run migrations: {ex}");
-                throw;
             }
         }
 
