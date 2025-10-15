@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using MassTransit;
+using Common.Dto;
+using Microsoft.AspNetCore.SignalR;
 using XOGameService.API.Exceptions;
 using XOGameService.API.Exceptions.Enums;
 using XOGameService.API.Hubs;
@@ -12,11 +14,13 @@ namespace XOGameService.API.Services
     {
         private readonly IXOGameRepository _repository;
         private readonly IHubContext<GameHub> _gameHubContext;
+        private readonly IPublishEndpoint _publishEndpoint;
 
-        public GameService(IXOGameRepository repository, IHubContext<GameHub> gameHubContext)
+        public GameService(IXOGameRepository repository, IHubContext<GameHub> gameHubContext, IPublishEndpoint publishEndpoint)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _gameHubContext = gameHubContext ?? throw new ArgumentNullException(nameof(gameHubContext));
+            _publishEndpoint = publishEndpoint ?? throw new ArgumentNullException(nameof(publishEndpoint));
         }
 
         public async Task<GameState> CreateGame(string playerXId, string playerOId)
@@ -99,13 +103,29 @@ namespace XOGameService.API.Services
             currentState.Version++;
             currentState.UpdatedAt = DateTime.UtcNow;
 
-            if (IsWinning(currentState.Cells, expectedPlayerEnum))
+            bool isWinning = IsWinning(currentState.Cells, expectedPlayerEnum);
+            bool isFull = IsFull(currentState.Cells);
+
+            if (isWinning || isFull)
             {
-                currentState.Status = expectedPlayer == 'X' ? GameStatus.XWon : GameStatus.OWon;
-            }
-            else if (IsFull(currentState.Cells))
-            {
-                currentState.Status = GameStatus.Draw;
+                if (isWinning)
+                {
+                    currentState.Status = expectedPlayer == 'X' ? GameStatus.XWon : GameStatus.OWon;
+                }
+                else
+                {
+                    currentState.Status = GameStatus.Draw;
+                }
+
+                string? winnerUserId = currentState.Status == GameStatus.Draw ? null : currentState.Status == GameStatus.XWon ? currentState.PlayerXId : currentState.PlayerOId;
+                await _publishEndpoint.Publish(new GameEndedEvent(
+                    MatchId: currentState.GameId,
+                    PlayerUserIds: new List<string> { currentState.PlayerXId, currentState.PlayerOId },
+                    StartedAt: DateTime.UtcNow,
+                    EndedAt: DateTime.UtcNow,
+                    MoveHistory: string.Empty,
+                    WinnerUserId: winnerUserId
+                    ));
             }
             else
             {
