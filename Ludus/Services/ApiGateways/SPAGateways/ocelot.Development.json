@@ -175,6 +175,70 @@
                 "AuthenticationProviderKey": "LudusAuth",
                 "AllowedScopes": []
             }
+        },
+        {
+            "DownstreamPathTemplate": "/api/chat",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+            {
+                "Host": "chatservice",
+                "Port": 5090
+            }
+            ],
+            "UpstreamPathTemplate": "/chat",
+            "UpstreamHttpMethod": [ "GET", "POST", "PUT" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "LudusAuth",
+                "AllowedScopes": []
+            }
+        },
+        {
+            "DownstreamPathTemplate": "/api/chat/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+            {
+                "Host": "chatservice",
+                "Port": 5090
+            }
+            ],
+            "UpstreamPathTemplate": "/chat/{everything}",
+            "UpstreamHttpMethod": [ "GET", "POST", "PUT" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "LudusAuth",
+                "AllowedScopes": []
+            }
+        },
+        {
+            "DownstreamPathTemplate": "/chathub",
+            "DownstreamScheme": "ws",
+            "DownstreamHostAndPorts": [
+            {
+                "Host": "chatservice",
+                "Port": 5090
+            }
+            ],
+            "UpstreamPathTemplate": "/ws/chathub",
+            "UpstreamHttpMethod": [ "GET" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "LudusAuth",
+                "AllowedScopes": []
+            }
+        },
+        {
+            "DownstreamPathTemplate": "/chathub/negotiate",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+            {
+                "Host": "chatservice",
+                "Port": 5090
+            }
+            ],
+            "UpstreamPathTemplate": "/ws/chathub/negotiate",
+            "UpstreamHttpMethod": [ "POST" ],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "LudusAuth",
+                "AllowedScopes": []
+            }
         }
     ],
     "GlobalConfiguration": {
