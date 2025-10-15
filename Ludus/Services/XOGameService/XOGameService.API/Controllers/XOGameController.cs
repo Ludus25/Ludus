@@ -39,9 +39,15 @@ namespace XOGameService.API.Controllers
                 return value.ToString();
             }
 
+            var emailClaim = User?.Claims?.FirstOrDefault(c => c.Type.Contains("email", StringComparison.OrdinalIgnoreCase))?.Value;
+            if (!string.IsNullOrWhiteSpace(emailClaim))
+            {
+                return emailClaim;   
+            }
+
             _logger.LogWarning("Missing X-UserEmail header in request from {RemoteIp}",
                 HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown");
-            return "anonymusEmail";
+            return "anonymousEmail";
         }
 
         [HttpPost]
