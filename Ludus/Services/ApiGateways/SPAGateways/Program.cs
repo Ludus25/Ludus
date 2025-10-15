@@ -76,6 +76,7 @@ app.Use(async (context, next) =>
         Console.WriteLine("[GATEWAY] --- Claims after Authentication (Manual Header Injection) ---");
         string userId = null;
         string userRole = null;
+        string userEmail = null;
 
         foreach (var claim in context.User.Claims)
         {
@@ -87,6 +88,10 @@ app.Use(async (context, next) =>
             if (claim.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")
             {
                 userRole = claim.Value;
+            }
+            if (claim.Type.Contains("email", StringComparison.OrdinalIgnoreCase))
+            {
+                userEmail = claim.Value;
             }
         }
         Console.WriteLine("[GATEWAY] -------------------------------------------------------------");
@@ -100,6 +105,11 @@ app.Use(async (context, next) =>
         {
             context.Request.Headers.TryAdd("X-UserRole", userRole);
             Console.WriteLine($"[GATEWAY] Manually injected X-UserRole: {userRole}");
+        }
+        if (!string.IsNullOrEmpty(userEmail))
+        {
+            context.Request.Headers.TryAdd("X-UserEmail", userEmail);
+            Console.WriteLine($"[GATEWAY] Manually injected X-UserEmail: {userEmail}");
         }
         context.Request.Headers.TryAdd("X-Debug-Manual", "ManualInjectWorks");
         Console.WriteLine("[GATEWAY] Manually injected X-Debug-Manual: ManualInjectWorks");

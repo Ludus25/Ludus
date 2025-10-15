@@ -2,8 +2,10 @@ import { useState } from "react";
 import { Card, Button, Input, Divider } from "antd";
 import { useChat } from "../model/useChat";
 
-export default function ChatWidget({ username, gameId }: { username: string; gameId: string }) {
+export default function ChatWidget({ gameId }: { gameId: string }) {
   const [message, setMessage] = useState("");
+  const [username, setUsername] = useState("");
+  const [nameEntered, setNameEntered] = useState(false);
   const { messages, sendMessage, chatEndRef } = useChat(username, gameId);
   const [open, setOpen] = useState(true);
 
@@ -24,6 +26,35 @@ export default function ChatWidget({ username, gameId }: { username: string; gam
         💬 Chat
       </Button>
     );
+  
+  if (!nameEntered) {
+    return (
+      <Card
+        title="Enter your name"
+        style={{
+          position: "fixed",
+          bottom: 20,
+          right: 20,
+          width: 300,
+          zIndex: 1000,
+        }}
+      >
+        <Input
+          placeholder="Your name..."
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          onPressEnter={() => username.trim() && setNameEntered(true)}
+        />
+        <Button
+          type="primary"
+          style={{ marginTop: 10, width: "100%" }}
+          onClick={() => username.trim() && setNameEntered(true)}
+        >
+          Join chat
+        </Button>
+      </Card>
+    );
+  }
 
   return (
     <Card
@@ -70,7 +101,7 @@ export default function ChatWidget({ username, gameId }: { username: string; gam
                   maxWidth: "70%",
                 }}
               >
-                <b>{m.sender}</b>
+                <b>{m.sender}</b> {/* ispis imena iznad poruke */}
                 <Divider style={{ margin: "4px 0" }} />
                 <span>{m.content}</span>
               </div>
