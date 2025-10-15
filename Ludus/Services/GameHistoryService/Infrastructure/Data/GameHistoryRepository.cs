@@ -34,41 +34,19 @@ namespace Data
             await _db.SaveChangesAsync(ct);
         }
 
-        public async Task AppendChatMessageAsync(string matchId, IEnumerable<ChatMessage> messages, CancellationToken ct)
-        {
-            var match = await _db.GameHistories.Include(g => g.ChatMessages).FirstOrDefaultAsync(g =>  g.MatchId == matchId, ct);
-            if (match == null)
-            {
-                match = new GameHistory
-                {
-                    MatchId = matchId,
-                    PlayerUserIds = new List<string>(),
-                    StartedAt = DateTime.UtcNow,
-                    EndedAt = DateTime.UtcNow,
-                    MoveHistory = string.Empty,
-                    ChatMessages = new List<ChatMessage>()
-                };
-
-                await _db.GameHistories.AddAsync(match, ct);
-            }
-
-            foreach (var m in messages)
-            {
-                m.GameMatchId = matchId;
-                match.ChatMessages.Add(m);
-            }
-
-            await _db.SaveChangesAsync(ct);
-        }
-
         public async Task<IEnumerable<GameHistory>> GetGamesByUserAsync(string userId, int limit, int offset, CancellationToken ct)
         {
-            return await _db.GameHistories.AsNoTracking().Where(g => g.PlayerUserIds.Contains(userId)).OrderByDescending(g => g.EndedAt).Skip(offset).Take(limit).Include(g => g.ChatMessages).ToListAsync(ct);
+            return await _db.GameHistories.AsNoTracking().Where(g => g.PlayerUserIds.Contains(userId)).OrderByDescending(g => g.EndedAt).Skip(offset).Take(limit).ToListAsync(ct);
+        }
+
+        public async Task<IEnumerable<GameHistory>> GetGamesByEmailAsync(string userEmail, int limit, int offset, CancellationToken ct)
+        {
+            return await _db.GameHistories.AsNoTracking().Where(g => g.PlayerEmails.Contains(userEmail)).OrderByDescending(g => g.EndedAt).Skip(offset).Take(limit).ToListAsync(ct);
         }
 
         public async Task<GameHistory?> GetByMatchIdAsync(string matchId, CancellationToken ct)
         {
-            return await _db.GameHistories.Include(g => g.ChatMessages).FirstOrDefaultAsync(g => g.MatchId == matchId, ct);
+            return await _db.GameHistories.FirstOrDefaultAsync(g => g.MatchId == matchId, ct);
         }
     }
 }

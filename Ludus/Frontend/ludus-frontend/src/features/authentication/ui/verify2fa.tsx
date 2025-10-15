@@ -36,6 +36,7 @@ const Verify2FAModal: React.FC<Props> = ({
             value={code}
             onChange={e => setCode(e.target.value)}
             required
+            autoFocus
             style={inputStyle}
             placeholder="Enter code"
           />

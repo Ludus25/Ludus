@@ -6,7 +6,7 @@ namespace XOGameService.API.Services
     {
         Task<GameState> CreateGame(string playerXId, string playerOId);
         Task<GameState?> GetGame(string gameId);
-        Task<GameState> MakeMove(string gameId, int CellIndex, int expectedVersion, string actingUserId);
+        Task<GameState> MakeMove(string gameId, int CellIndex, int expectedVersion, string actingUserId, string ActingUserEmail);
         Task<GameState?> GetActiveGameByUserId(string userId);
 
     }

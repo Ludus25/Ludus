@@ -6,7 +6,9 @@ namespace XOGameService.API.Models
     {
         public string GameId { get; set; } = Guid.NewGuid().ToString();
         public string PlayerXId { get; set; } = string.Empty;
-        public string PlayerOId { get; set;} = string.Empty;
+        public string PlayerOId { get; set; } = string.Empty;
+        public string PlayerXEmail { get; set; } = string.Empty;
+        public string PlayerOEmail { get; set; } = string.Empty;
         public Cell[] Cells { get; set; } = Enumerable.Repeat(Cell.Empty, 9).ToArray();
         public char NextPlayer { get; set; } = 'X';
         public GameStatus Status { get; set; } = GameStatus.InProgress;

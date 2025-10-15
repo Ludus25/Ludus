@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Identity;
+ï»¿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -14,19 +14,24 @@ using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-//builder.Services.AddControllers();
-
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173") 
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "ProjekatRS2 API",
+        Title = "Authentication",
         Version = "v1",
-        Description = "API documentation ProjekatRS2"
+        Description = "API authentication"
     });
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -79,7 +84,6 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
-    // Password settings
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = true;
@@ -87,36 +91,27 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     options.Password.RequiredLength = 8;
     options.Password.RequiredUniqueChars = 1;
 
-    // Lockout settings
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
     options.Lockout.MaxFailedAccessAttempts = 5;
     options.Lockout.AllowedForNewUsers = true;
 
-    // Sign-in settings
     options.SignIn.RequireConfirmedEmail = true;
     options.SignIn.RequireConfirmedPhoneNumber = false;
 
-    // User settings
     options.User.RequireUniqueEmail = true;
     options.User.AllowedUserNameCharacters =
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
 
-    // Two-Factor token provider settings (ako želiš da prilagodiš)
-    // Ovo obièno ne moraš menjati osim ako hoæeš drugaèiji provider/tip
+   
 })
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
-// ...
-// nakon što dodaš Identity i konfiguracije Jwt, DbContext itd.
 
-// Registruj tvoj email sender servis:
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 
-// Registruj korisnièki repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-// Registruj servis za 2FA
 builder.Services.AddScoped<ITwoFactorService, TwoFactorService>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -152,10 +147,10 @@ using (var scope = app.Services.CreateScope())
         app.Logger.LogInformation("Database already exists; continuing startup.");
     }
 
-    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-    await SeedRoles(roleManager);
+    //var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    //await SeedRoles(roleManager);
 }
-static async Task SeedRoles(RoleManager<IdentityRole> roleManager)
+/*static async Task SeedRoles(RoleManager<IdentityRole> roleManager)
 
 {
     if (!await roleManager.RoleExistsAsync("Admin"))
@@ -163,7 +158,7 @@ static async Task SeedRoles(RoleManager<IdentityRole> roleManager)
 
     if (!await roleManager.RoleExistsAsync("User"))
         await roleManager.CreateAsync(new IdentityRole("User"));
-}
+}*/
 
 using (var scope = app.Services.CreateScope())
 {
@@ -173,6 +168,9 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowFrontend");
+
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -20,7 +20,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, loading, error }) => {
       {error && <div className="error-message">{error}</div>}
       <input
         type="text"
-        placeholder="Email or phone number"
+        placeholder="Email"
         value={email}
         onChange={e => setEmail(e.target.value)}
         required
@@ -35,11 +35,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, loading, error }) => {
       <button type="submit" disabled={loading}>
         Log In
       </button>
-      <div className="forgot-password">
-        <a href="#" onClick={e => { e.preventDefault(); /* handle forgot password */ }}>
-          Forgot password?
-        </a>
-      </div>
     </form>
   )
 }

@@ -67,19 +67,6 @@ services:
     ports:
       - "6379:6379"
 
-  postgres-db:
-    container_name: postgres-db
-    image: postgres:latest
-    restart: always
-    environment:
-      POSTGRES_USER: userChat
-      POSTGRES_PASSWORD: passChat
-      POSTGRES_DB: chatdb
-    ports:
-      - "5433:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-
   xogameservice.api:
     container_name: xogame.api
     environment:
@@ -129,7 +116,6 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
-      - ConnectionStrings__DefaultConnection=Host=postgres-db;Port=5432;Database=chatdb;Username=userChat;Password=passChat
     ports:
       - "8080:8080"
       - "8081:8081"
@@ -166,11 +152,4 @@ services:
         condition: service_healthy
     restart: unless-stopped
     ports:
-      - "5672:5672"
-      - "15672:15672"
-
-volumes:
-  postgres-data:
-  mssql_data:
-    
       - "8002:80"

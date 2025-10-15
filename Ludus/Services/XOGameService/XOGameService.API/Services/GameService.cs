@@ -24,6 +24,18 @@ namespace XOGameService.API.Services
             _publishEndpoint = publishEndpoint ?? throw new ArgumentNullException(nameof(publishEndpoint));
         }
 
+        private static void SetEmailForUser(GameState game, string userId, string email)
+        {
+            if (userId == game.PlayerXId)
+            {
+                game.PlayerXEmail = email;
+            }
+            else
+            {
+                game.PlayerOEmail = email;
+            }
+        }
+
         public async Task<GameState> CreateGame(string playerXId, string playerOId)
         {
             var gameState = new GameState
@@ -41,7 +53,7 @@ namespace XOGameService.API.Services
             return await _repository.GetAsync(gameId);
         }
 
-        public async Task<GameState> MakeMove(string gameId, int cellIndex, int expectedVersion, string actingUserId)
+        public async Task<GameState> MakeMove(string gameId, int cellIndex, int expectedVersion, string actingUserId, string actingUserEmail)
         {
             if (cellIndex < 0 || cellIndex > 8)
             {
@@ -59,6 +71,8 @@ namespace XOGameService.API.Services
                     $"Game {gameId} not found."
                     );
             }
+
+            SetEmailForUser(currentState, actingUserId, actingUserEmail);
 
             if (currentState.Status != GameStatus.InProgress)
             {
@@ -124,6 +138,7 @@ namespace XOGameService.API.Services
                 await _publishEndpoint.Publish(new GameEndedEvent(
                     MatchId: currentState.GameId,
                     PlayerUserIds: new List<string> { currentState.PlayerXId, currentState.PlayerOId },
+                    PlayerEmails: new List<string> { currentState.PlayerXEmail, currentState.PlayerOEmail},
                     StartedAt: currentState.CreatedAt,
                     EndedAt: DateTime.UtcNow,
                     MoveHistory: currentState.MoveHistory,

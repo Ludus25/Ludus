@@ -10,9 +10,10 @@ export function useAuth() {
     setError(null)
     setLoading(true)
     try {
-      return await authApi.register(dto)
+      const response = await authApi.register(dto)
+      return { success: true, message: response.message }
     } catch (err: any) {
-      const msg = err?.response?.data ?? err.message
+      const msg = err?.response?.data?.message ?? err.message ?? 'Registration failed'
       return { success: false, message: msg }
     } finally {
       setLoading(false)
@@ -25,7 +26,7 @@ export function useAuth() {
     try {
       return await authApi.login(dto)
     } catch (err: any) {
-      const msg = err?.response?.data ?? err.message
+      const msg = err?.response?.data?.message ?? err.message ?? 'Login failed'
       return { success: false, message: msg }
     } finally {
       setLoading(false)
@@ -38,7 +39,7 @@ export function useAuth() {
     try {
       return await authApi.verify2FA(dto)
     } catch (err: any) {
-      const msg = err?.response?.data ?? err.message
+      const msg = err?.response?.data?.message ?? err.message ?? 'Verification failed'
       return { success: false, message: msg }
     } finally {
       setLoading(false)

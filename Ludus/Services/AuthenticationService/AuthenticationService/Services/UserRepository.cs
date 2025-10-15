@@ -1,16 +1,19 @@
 ﻿using AuthenticationService.Entities;
 using Microsoft.EntityFrameworkCore;
 using AuthenticationService.Data;
+using Microsoft.AspNetCore.Identity;
 
 namespace AuthenticationService.Services
 {
     public class UserRepository : IUserRepository
     {
         private readonly AppDbContext _dbContext;
+        private readonly UserManager<User> _userManager;
 
-        public UserRepository(AppDbContext dbContext)
+        public UserRepository(AppDbContext dbContext, UserManager<User> userManager)
         {
             _dbContext = dbContext;
+            _userManager= userManager;
         }
 
         public async Task<User> GetByEmailAsync(string email)
@@ -29,7 +32,8 @@ namespace AuthenticationService.Services
         }
         public async Task<List<User>> GetAllUsers()
         {
-            return await _dbContext.Users.ToListAsync();
+            var users = await _userManager.GetUsersInRoleAsync("User");
+            return users.ToList();
         }
         public async Task UpdateAsync(User user)
         {

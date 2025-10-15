@@ -7,6 +7,5 @@ namespace Messaging
         public string UserName { get; set; } = "guest";
         public string Password { get; set; } = "guest";
         public string GameEndedQueue { get; set; } = "game_ended";
-        public string ChatLogQueue { get; set; } = "chat_log";
     }
 }
