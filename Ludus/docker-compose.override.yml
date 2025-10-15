@@ -73,13 +73,17 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - "RedisCacheSettings:ConnectionString=xogamedb:6379"
+      - "RabbitMQ:HostAddress=amqp://guest:guest@rabbitmq:5672"
       - "Kestrel__Endpoints__Http__Url=http://+:8080"
       - "Kestrel__Endpoints__Http__Protocols=Http1"
       - "Kestrel__Endpoints__Grpc__Url=http://+:8081"
       - "Kestrel__Endpoints__Grpc__Protocols=Http2"
       - "GameFrontendUrl=http://localhost:5173"
     depends_on:
-      - xogamedb
+      xogamedb:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     ports:
       - "8001:8080"  # REST API (HTTP/1.1)
       - "8082:8081"  # gRPC (HTTP/2)
