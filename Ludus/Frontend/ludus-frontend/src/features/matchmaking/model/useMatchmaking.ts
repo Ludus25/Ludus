@@ -8,7 +8,7 @@ export function useMatchmaking(navigate?: NavigateFunction) {
   const [status, setStatus] = useState<MatchStatus | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const isConnecting = useRef(false)  // ✅ DODATO
+  const isConnecting = useRef(false)  
 
   const hub = useMemo(() => 
     new signalR.HubConnectionBuilder()
@@ -21,7 +21,7 @@ export function useMatchmaking(navigate?: NavigateFunction) {
 
   useEffect(() => {
     const startConnection = async () => {
-      // ✅ Izbegni duplicate pokušaje
+     
       if (isConnecting.current) return
       if (hub.state !== signalR.HubConnectionState.Disconnected) return
 
@@ -69,7 +69,7 @@ export function useMatchmaking(navigate?: NavigateFunction) {
     })
 
     return () => {
-      hub.off('MatchFound')  // ✅ Ukloni listener
+      hub.off('MatchFound')  
       
       if (hub.state === signalR.HubConnectionState.Connected) {
         hub.stop().catch(err => console.error('[SIGNALR] Stop error:', err))

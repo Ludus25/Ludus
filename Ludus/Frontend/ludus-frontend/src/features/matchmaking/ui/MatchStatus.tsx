@@ -10,7 +10,7 @@ interface Props {
 
 export default function MatchStatus({ status, polling }: Props) {
   if (!status) {
-    return <Text type="secondary">Niste u matchmaking-u</Text>
+    return <Text type="secondary">Not in matchmaking</Text>
   }
 
   if (status.status === 'searching') {
@@ -20,7 +20,7 @@ export default function MatchStatus({ status, polling }: Props) {
         message={
           <>
             <Spin size="small" style={{ marginRight: 8 }} />
-            Tražimo protivnika...
+            Searching for opponent...
           </>
         }
         showIcon={false}
@@ -32,8 +32,8 @@ export default function MatchStatus({ status, polling }: Props) {
     return (
       <Alert
         type="success"
-        message={`Match pronađen! MatchId: ${status.matchId}`}
-        description={`Igrači: ${status.players?.join(', ')}`}
+        message="Match Found!"
+        description={`Players: ${status.players?.join(' vs ')}`}
         showIcon
       />
     )

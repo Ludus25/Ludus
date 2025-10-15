@@ -12,7 +12,7 @@ export default function MatchmakingPage() {
   const [playerId, setPlayerId] = useState<string | null>(null)
 
   useEffect(() => {
-    // Ekstraktuj email iz JWT tokena
+    // Extract email from JWT token
     const token = localStorage.getItem('token')
     if (token) {
       try {
@@ -31,7 +31,7 @@ export default function MatchmakingPage() {
   const handleJoin = async () => {
     if (!playerId) return
     
-    // AUTO join sa playerId iz tokena
+    // Auto join with playerId from token
     await join({ playerId, rating: 1500 })
   }
 
@@ -50,14 +50,6 @@ export default function MatchmakingPage() {
 
       <Card title="Find a Match">
         <Space direction="vertical" style={{ width: '100%' }}>
-          {playerId && (
-            <Alert 
-              type="info" 
-              message={`Playing as: ${playerId}`} 
-              showIcon 
-            />
-          )}
-
           {!polling ? (
             <Button
               type="primary"

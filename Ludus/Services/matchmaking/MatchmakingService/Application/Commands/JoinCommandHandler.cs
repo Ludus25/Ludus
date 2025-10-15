@@ -31,7 +31,7 @@ namespace MatchmakingService.Application.Commands
             if (_repo.IsPlayerInQueue(cmd.PlayerId))
                 return "Player already in queue";
 
-            // Koristi rating direktno iz request-a
+           
             int rating = cmd.Rating;
             Console.WriteLine($"[MATCHMAKING] Player {cmd.PlayerId} joining with rating {rating}");
 

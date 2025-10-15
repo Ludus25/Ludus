@@ -17,7 +17,7 @@ namespace MatchmakingService.Infrastructure.Grpc
             
             Console.WriteLine($"[GRPC-CLIENT] Connecting to Game Service at: {address}");
             
-            // Omogući HTTP/2 bez TLS-a
+            
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
             
             var channel = GrpcChannel.ForAddress(address);
