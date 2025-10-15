@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { Card, Button, Input, Divider } from "antd";
+import { Card, Button, Input, Divider, Tag } from "antd";
 import { useChat } from "../model/useChat";
 
 export default function ChatWidget({ gameId }: { gameId: string }) {
   const [message, setMessage] = useState("");
   const [username, setUsername] = useState("");
   const [nameEntered, setNameEntered] = useState(false);
-  const { messages, sendMessage, chatEndRef } = useChat(username, gameId);
   const [open, setOpen] = useState(true);
+
+  const { messages, sendMessage, chatEndRef, onlineUsers } = useChat(username, gameId);
 
   const handleSend = () => {
     if (message.trim()) {
@@ -26,7 +27,8 @@ export default function ChatWidget({ gameId }: { gameId: string }) {
         💬 Chat
       </Button>
     );
-  
+
+
   if (!nameEntered) {
     return (
       <Card
@@ -70,14 +72,38 @@ export default function ChatWidget({ gameId }: { gameId: string }) {
         position: "fixed",
         bottom: 20,
         right: 20,
-        width: 300,
-        height: 400,
+        width: 320,
+        height: 440,
         display: "flex",
         flexDirection: "column",
         zIndex: 1000,
       }}
       bodyStyle={{ display: "flex", flexDirection: "column", flex: 1 }}
     >
+      
+      <div
+        style={{
+          marginBottom: 6,
+          maxHeight: 60,
+          overflowY: "auto",
+          padding: "4px 0",
+          borderBottom: "1px solid #ddd",
+        }}
+      >
+        <b>Online players:</b>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 4 }}>
+          {onlineUsers && onlineUsers.length > 0 ? (
+            onlineUsers.map((u, i) => (
+              <Tag key={i} color={u === username ? "blue" : "default"}>
+                {u}
+              </Tag>
+            ))
+          ) : (
+            <span style={{ color: "#999" }}>No players online</span>
+          )}
+        </div>
+      </div>
+
       <div
         style={{
           flex: 1,
@@ -101,7 +127,7 @@ export default function ChatWidget({ gameId }: { gameId: string }) {
                   maxWidth: "70%",
                 }}
               >
-                <b>{m.sender}</b> {/* ispis imena iznad poruke */}
+                <b>{m.sender}</b>
                 <Divider style={{ margin: "4px 0" }} />
                 <span>{m.content}</span>
               </div>
