@@ -147,8 +147,8 @@ using (var scope = app.Services.CreateScope())
         app.Logger.LogInformation("Database already exists; continuing startup.");
     }
 
-    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-   // await SeedRoles(roleManager);
+    //var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    //await SeedRoles(roleManager);
 }
 /*static async Task SeedRoles(RoleManager<IdentityRole> roleManager)
 

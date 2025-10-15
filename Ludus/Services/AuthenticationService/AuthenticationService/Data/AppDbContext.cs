@@ -19,7 +19,7 @@ namespace AuthenticationService.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-             SeedAdminUser(builder);
+             //SeedAdminUser(builder);
 
         }
 
