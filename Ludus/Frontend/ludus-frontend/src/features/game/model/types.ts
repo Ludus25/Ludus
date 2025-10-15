@@ -31,9 +31,9 @@ export const isInProgress = (s: GameStatusWire) =>
   s === 0 || s === 'InProgress';
 
 export const statusText = (s: GameStatusWire) => {
-  if (s === 0 || s === 'InProgress') return 'U toku';
-  if (s === 1 || s === 'XWon') return 'Pobednik: X';
-  if (s === 2 || s === 'OWon') return 'Pobednik: O';
-  if (s === 3 || s === 'Draw') return 'Nerešeno';
+  if (s === 0 || s === 'InProgress') return 'In progress';
+  if (s === 1 || s === 'XWon') return 'Winner: X';
+  if (s === 2 || s === 'OWon') return 'Winner: O';
+  if (s === 3 || s === 'Draw') return 'Draw';
   return String(s);
 };

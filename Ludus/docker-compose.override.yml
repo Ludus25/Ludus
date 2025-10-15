@@ -1,4 +1,48 @@
 services:
+  rabbitmq:
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 10s
+      timeout: 4s
+      retries: 20
+      start_period: 60s
+
+  gamehistoryservicedb:
+    container_name: gamehistorydb
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin4444
+      - POSTGRES_DB=GameHistoryServiceDb
+    restart: always
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 5432 -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 4
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+  pgadmin:
+    container_name: pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=bapop413@gmail.com
+      - PGADMIN_DEFAULT_PASSWORD=admin4444
+      - POSTGRES_DB=GameHistoryServiceDb
+    restart: always
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/root/.pgadmin
+
   sqlserver:
     container_name: ludus-sqlserver
     environment:
@@ -9,6 +53,12 @@ services:
     volumes:
       - mssql_data:/var/opt/mssql/data
     user: root
+    healthcheck:
+      test: ["CMD-SHELL", "bash -lc '</dev/tcp/127.0.0.1/1433'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
 
   xogamedb:
     container_name: xogamedb
@@ -17,19 +67,38 @@ services:
     ports:
       - "6379:6379"
 
+  postgres-db:
+    container_name: postgres-db
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: userChat
+      POSTGRES_PASSWORD: passChat
+      POSTGRES_DB: chatdb
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
   xogameservice.api:
     container_name: xogame.api
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - "RedisCacheSettings:ConnectionString=xogamedb:6379"
-      - ASPNETCORE_URLS=http://+:8080
-      - ASPNETCORE_Kestrel__Endpoints__Grpc__Protocols=Http2
-      - ASPNETCORE_Kestrel__Endpoints__Grpc__Url=http://+:8080
-      - ASPNETCORE_Kestrel__EndpointDefaults__Protocols=Http1AndHttp2
+      - "RabbitMQ:HostAddress=amqp://guest:guest@rabbitmq:5672"
+      - "Kestrel__Endpoints__Http__Url=http://+:8080"
+      - "Kestrel__Endpoints__Http__Protocols=Http1"
+      - "Kestrel__Endpoints__Grpc__Url=http://+:8081"
+      - "Kestrel__Endpoints__Grpc__Protocols=Http2"
+      - "GameFrontendUrl=http://localhost:5173"
     depends_on:
-      - xogamedb
+      xogamedb:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     ports:
       - "8001:8080"
+      - "8082:8081"
 
   authenticationservice:
     container_name: ludus-authenticationservice
@@ -38,7 +107,8 @@ services:
       - ASPNETCORE_HTTP_PORTS=8080
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=Ludus;User Id=sa;Password=LudusBaza123!;TrustServerCertificate=True;
     depends_on:
-      - sqlserver
+      sqlserver:
+        condition: service_healthy
     ports:
       - "7000:8080"
 
@@ -55,6 +125,15 @@ services:
     ports:
       - "8010:8080"
 
+  chatservice:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ConnectionStrings__DefaultConnection=Host=postgres-db;Port=5432;Database=chatdb;Username=userChat;Password=passChat
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+ 
   matchmakingservice:
     container_name: matchmakingservice
     build:
@@ -64,15 +143,34 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - RABBIT_HOST=rabbitmq
-      - GAME_GRPC_ADDRESS=http://xogameservice.api:8080
+      - GAME_GRPC_ADDRESS=http://xogameservice.api:8081
     depends_on:
       - rabbitmq
       - xogameservice.api
     ports:
       - "5002:8080"
+   
     
-  rabbitmq:
-    image: rabbitmq:3-management
+  gamehistoryservice:
+    container_name: gamehistoryservice
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - "RabbitMQ:HostAddress=amqp://guest:guest@rabbitmq:5672"
+      - "RabbitMQ:GameEndedQueue=game_ended-queue"
+      - "RabbitMQ:ChatLogQueue=chat_log_queue"
+      - "ConnectionStrings:DbConnectionString=Server=gamehistoryservicedb;Port=5432;Database=GameHistoryServiceDb;User Id=admin; Password=admin4444;"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      gamehistoryservicedb:
+        condition: service_healthy
+    restart: unless-stopped
     ports:
       - "5672:5672"
       - "15672:15672"
+
+volumes:
+  postgres-data:
+  mssql_data:
+    
+      - "8002:80"

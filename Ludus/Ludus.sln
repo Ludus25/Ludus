@@ -7,20 +7,30 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{DC
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "XOGameService", "XOGameService", "{50D84AE7-E1BF-4176-822C-88A4798BCA2E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XOGameService.API", "Services\XOGameService\XOGameService.API\XOGameService.API.csproj", "{91486578-89CE-4A79-8579-AEDA63D7E6C4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XOGameService.API", "Services\XOGameService\XOGameService.API\XOGameService.API.csproj", "{91486578-89CE-4A79-8579-AEDA63D7E6C4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EA53AD0A-C2FD-7FCF-C892-73BC23105886} = {EA53AD0A-C2FD-7FCF-C892-73BC23105886}
+	EndProjectSection
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{95E375DE-C36C-4CC5-9A5B-2769FCC4C185}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthenticationService", "Services\AuthenticationService\AuthenticationService\AuthenticationService.csproj", "{54B755CC-1D8D-4526-A921-F2D8AD1268D3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AuthenticationService", "AuthenticationService", "{76642BD3-9742-4D36-9273-053B3FA6DA04}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ApiGateways", "ApiGateways", "{3F5CC9CF-9C6F-4D3A-BFD8-D8D67E96E640}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LudusGateways", "Services\ApiGateways\SPAGateways\LudusGateways.csproj", "{967BFEA8-44A6-40AE-955C-E07499344FFA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatService", "Services\Chat\ChatService\ChatService.csproj", "{53E7F1A3-D6CE-419A-800D-E85761765802}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Matchmaking", "Matchmaking", "{0B24B155-7E8F-42FB-81A5-7868A050B8ED}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MatchmakingService", "Services\matchmaking\MatchmakingService\MatchmakingService.csproj", "{4E7F0BCC-4148-4438-9FAF-06FF2D6E952C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Services\Common\Common.csproj", "{EA53AD0A-C2FD-7FCF-C892-73BC23105886}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameHistoryService", "Services\GameHistoryService\GameHistoryService.csproj", "{3221ADB7-06EC-F1EA-5F33-6534B09454AF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,10 +54,22 @@ Global
 		{967BFEA8-44A6-40AE-955C-E07499344FFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{967BFEA8-44A6-40AE-955C-E07499344FFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{967BFEA8-44A6-40AE-955C-E07499344FFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53E7F1A3-D6CE-419A-800D-E85761765802}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53E7F1A3-D6CE-419A-800D-E85761765802}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53E7F1A3-D6CE-419A-800D-E85761765802}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53E7F1A3-D6CE-419A-800D-E85761765802}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4E7F0BCC-4148-4438-9FAF-06FF2D6E952C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4E7F0BCC-4148-4438-9FAF-06FF2D6E952C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E7F0BCC-4148-4438-9FAF-06FF2D6E952C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4E7F0BCC-4148-4438-9FAF-06FF2D6E952C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA53AD0A-C2FD-7FCF-C892-73BC23105886}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA53AD0A-C2FD-7FCF-C892-73BC23105886}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA53AD0A-C2FD-7FCF-C892-73BC23105886}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA53AD0A-C2FD-7FCF-C892-73BC23105886}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3221ADB7-06EC-F1EA-5F33-6534B09454AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3221ADB7-06EC-F1EA-5F33-6534B09454AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3221ADB7-06EC-F1EA-5F33-6534B09454AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3221ADB7-06EC-F1EA-5F33-6534B09454AF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -59,7 +81,13 @@ Global
 		{76642BD3-9742-4D36-9273-053B3FA6DA04} = {DC86A6F3-952E-4A50-B1EC-BE011FEABEF7}
 		{3F5CC9CF-9C6F-4D3A-BFD8-D8D67E96E640} = {DC86A6F3-952E-4A50-B1EC-BE011FEABEF7}
 		{967BFEA8-44A6-40AE-955C-E07499344FFA} = {3F5CC9CF-9C6F-4D3A-BFD8-D8D67E96E640}
+		{53E7F1A3-D6CE-419A-800D-E85761765802} = {DC86A6F3-952E-4A50-B1EC-BE011FEABEF7}
 		{0B24B155-7E8F-42FB-81A5-7868A050B8ED} = {DC86A6F3-952E-4A50-B1EC-BE011FEABEF7}
 		{4E7F0BCC-4148-4438-9FAF-06FF2D6E952C} = {0B24B155-7E8F-42FB-81A5-7868A050B8ED}
+		{EA53AD0A-C2FD-7FCF-C892-73BC23105886} = {DC86A6F3-952E-4A50-B1EC-BE011FEABEF7}
+		{3221ADB7-06EC-F1EA-5F33-6534B09454AF} = {DC86A6F3-952E-4A50-B1EC-BE011FEABEF7}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {746D238C-0393-4D2A-B198-7C013BCB1778}
 	EndGlobalSection
 EndGlobal

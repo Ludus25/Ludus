@@ -1,5 +1,14 @@
-
 services:
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+
+  gamehistoryservicedb:
+    image: postgres
+
+  pgadmin:
+    image: dpage/pgadmin4
+      
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     restart: always
@@ -10,6 +19,18 @@ services:
     restart: always
     ports:
       - "6379:6379"
+
+  postgres-db:
+    image: postgres:latest
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: userChat
+      POSTGRES_PASSWORD: passChat
+      POSTGRES_DB: chatdb
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
 
   xogameservice.api:
     image: ${DOCKER_REGISTRY-}xogameserviceapi
@@ -24,6 +45,12 @@ services:
       - xogamedb
     ports:
       - "8001:8080"
+
+  gamehistoryservice:
+    image: ${DOCKER_REGISTRY-}gamehistoryservice
+    build:
+      context: .
+      dockerfile: Services/GameHistoryService/Dockerfile
 
   authenticationservice:
     image: authenticationservice
@@ -45,9 +72,20 @@ services:
   ludusgateways:
     image: ${DOCKER_REGISTRY-}ludusgateways
     build:
-      context: .
+      context: . 
       dockerfile: Services/ApiGateways/SPAGateways/Dockerfile
 
+  chatservice:
+    image: ${DOCKER_REGISTRY-}chatservice
+    build:
+      context: Services/Chat/ChatService
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres-db
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres-db;Port=5432;Database=chatdb;Username=userChat;Password=passChat
+    ports:
+      - "5090:5090"
 
   matchmakingservice:
     image: ${DOCKER_REGISTRY-}matchmakingservice
@@ -57,6 +95,6 @@ services:
 
 volumes:
   mssql_data:
-
-
-
+  postgres_data:
+  pgadmin_data:
+  rabbitmq_data:

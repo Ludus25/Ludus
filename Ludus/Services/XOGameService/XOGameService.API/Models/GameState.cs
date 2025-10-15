@@ -13,5 +13,6 @@ namespace XOGameService.API.Models
         public int Version { get; set; } = 0;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public string MoveHistory { get; set; } = string.Empty;
     }
 }
