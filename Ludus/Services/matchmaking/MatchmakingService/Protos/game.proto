@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package game;
+
+message StartGameRequest {
+    string match_id = 1;
+    repeated Player players = 2;
+}
+
+message Player {
+    string player_id = 1;
+    int32 rating = 2;
+}
+
+message StartGameResponse {
+    bool success = 1;
+    string game_server_url = 2;
+    string message = 3;
+}
+
+service GameService {
+    rpc StartGame(StartGameRequest) returns (StartGameResponse);
+}
