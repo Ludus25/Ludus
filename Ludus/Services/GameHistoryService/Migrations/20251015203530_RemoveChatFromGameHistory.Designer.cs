@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GameHistoryService.Migrations
 {
     [DbContext(typeof(GameHistoryDbContext))]
-    partial class GameHistoryDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251015203530_RemoveChatFromGameHistory")]
+    partial class RemoveChatFromGameHistory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -35,10 +38,6 @@ namespace GameHistoryService.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<List<string>>("PlayerEmails")
-                        .IsRequired()
-                        .HasColumnType("text[]");
-
                     b.Property<List<string>>("PlayerUserIds")
                         .IsRequired()
                         .HasColumnType("text[]");
@@ -50,10 +49,6 @@ namespace GameHistoryService.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("MatchId");
-
-                    b.HasIndex("PlayerEmails");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("PlayerEmails"), "GIN");
 
                     b.HasIndex("PlayerUserIds");
 

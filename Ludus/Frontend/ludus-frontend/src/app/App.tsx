@@ -9,6 +9,7 @@ import UsersPage from '../features/admin/pages/userPages.tsx';
 import AdminRoute from '../features/admin/route/adminRoute.tsx';
 import { isLoggedIn } from '../shared/utils/auth'
 import React, { useState, useEffect } from 'react'
+import GameHistoryPage from "../features/history/pages/GameHistoryPage.tsx";
 
 const ProtectedRoute: React.FC<{ element: React.ReactElement }> = ({ element }) => {
   const [isAuth, setIsAuth] = useState(isLoggedIn())
@@ -56,6 +57,7 @@ export default function App() {
           <Route path="*" element={<Navigate to="/auth" />} />
           <Route path="/chat" element={<ProtectedRoute element={<ChatPage />} /> } />
           <Route path="*" element={<Navigate to="/auth" replace />} />
+          <Route path="/history" element={<ProtectedRoute element={<GameHistoryPage />} />} />
         </Routes>
       </div>
     </BrowserRouter>

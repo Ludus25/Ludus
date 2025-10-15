@@ -14,7 +14,11 @@
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "LudusAuth",
                 "AllowedScopes": []
-            }
+            },
+            "AddHeadersToRequest": [
+                { "Key": "X-UserId", "Value": "Claims[sub]" },
+                { "Key": "X-Email", "Value": "Claims[email]"}
+            ]
         },
         {
             "DownstreamPathTemplate": "/api/v1/xo-game/{everything}",
@@ -30,7 +34,11 @@
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "LudusAuth",
                 "AllowedScopes": []
-            }
+            },
+            "AddHeadersToRequest": [
+                { "Key": "X-UserId", "Value": "Claims[sub]" },
+                { "Key": "X-Email", "Value": "Claims[email]"}
+            ]
         },
         {
             "DownstreamPathTemplate": "/gamehub",

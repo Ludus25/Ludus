@@ -20,14 +20,12 @@ internal class Program
         builder.Services.AddMassTransit(x =>
         {
             x.AddConsumer<GameEndedEventConsumer>();
-            x.AddConsumer<ChatLogEventConsumer>();
 
             x.UsingRabbitMq((context, cfg) =>
             {
                 cfg.Host(builder.Configuration["RabbitMQ:HostAddress"]);
 
                 string gameEndedQueueName = builder.Configuration["RabbitMQ:GameEndedQueue"];
-                string chatLogQueueName = builder.Configuration["RabbitMQ:ChatLogQueue"];
 
                 cfg.ReceiveEndpoint(gameEndedQueueName, e =>
                 {
@@ -36,49 +34,41 @@ internal class Program
                     e.SetQueueArgument("x-dead-letter-routing-key", $"{gameEndedQueueName}.dlq");
                 });
 
-                cfg.ReceiveEndpoint(chatLogQueueName, e =>
-                {
-                    e.ConfigureConsumer<ChatLogEventConsumer>(context);
-                    e.SetQueueArgument("x-dead-letter-exchange", $"{chatLogQueueName}-dlx");
-                    e.SetQueueArgument("x-dead-letter-routing-key", $"{chatLogQueueName}.dlq");
-                });
-
                 cfg.ReceiveEndpoint($"{gameEndedQueueName}.dlq", e => e.Bind($"{gameEndedQueueName}-dlx", x => x.RoutingKey = $"{gameEndedQueueName}.dlq"));
-                cfg.ReceiveEndpoint($"{chatLogQueueName}.dlq", e => e.Bind($"{chatLogQueueName}-dlx", x => x.RoutingKey = $"{chatLogQueueName}.dlq"));
             });
         });
 
         // JWT settings
-        var jwtSection = builder.Configuration.GetSection("Jwt");
-        var jwtKey = jwtSection.GetValue<string>("Key");
-        if (string.IsNullOrEmpty(jwtKey))
-        {
-            Console.WriteLine("Warning: JWT Key not configured. API will run without authentication if no key is provided.");
-        }
-        else
-        {
-            var keyBytes = Encoding.UTF8.GetBytes(jwtKey);
-            builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
-            {
-                options.RequireHttpsMetadata = false;
-                options.SaveToken = true;
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = !string.IsNullOrEmpty(jwtSection.GetValue<string>("Issuer")),
-                    ValidIssuer = jwtSection.GetValue<string>("Issuer"),
-                    ValidateAudience = !string.IsNullOrEmpty(jwtSection.GetValue<string>("Audience")),
-                    ValidAudience = jwtSection.GetValue<string>("Audience"),
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
-                    ValidateLifetime = true
-                };
-            });
-        }
+        //var jwtSection = builder.Configuration.GetSection("Jwt");
+        //var jwtKey = jwtSection.GetValue<string>("Key");
+        //if (string.IsNullOrEmpty(jwtKey))
+        //{
+        //    Console.WriteLine("Warning: JWT Key not configured. API will run without authentication if no key is provided.");
+        //}
+        //else
+        //{
+        //    var keyBytes = Encoding.UTF8.GetBytes(jwtKey);
+        //    builder.Services.AddAuthentication(options =>
+        //    {
+        //        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        //        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        //    })
+        //    .AddJwtBearer(options =>
+        //    {
+        //        options.RequireHttpsMetadata = false;
+        //        options.SaveToken = true;
+        //        options.TokenValidationParameters = new TokenValidationParameters
+        //        {
+        //            ValidateIssuer = !string.IsNullOrEmpty(jwtSection.GetValue<string>("Issuer")),
+        //            ValidIssuer = jwtSection.GetValue<string>("Issuer"),
+        //            ValidateAudience = !string.IsNullOrEmpty(jwtSection.GetValue<string>("Audience")),
+        //            ValidAudience = jwtSection.GetValue<string>("Audience"),
+        //            ValidateIssuerSigningKey = true,
+        //            IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
+        //            ValidateLifetime = true
+        //        };
+        //    });
+        //}
 
         // DbContext
         builder.Services.AddDbContext<GameHistoryDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnectionString")));
@@ -106,11 +96,12 @@ internal class Program
 
         app.UseRouting();
 
-        if (!string.IsNullOrEmpty(jwtKey))
-        {
-            app.UseAuthentication();
-            app.UseAuthorization();
-        }
+        //if (!string.IsNullOrEmpty(jwtKey))
+        //{
+        //    app.UseAuthentication();
+        //}
+        
+        app.UseAuthorization();
 
         app.MapControllers();
 

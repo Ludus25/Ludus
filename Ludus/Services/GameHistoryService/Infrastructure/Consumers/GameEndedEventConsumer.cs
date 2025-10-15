@@ -33,7 +33,8 @@ namespace Consumers
                 StartedAt = dto.StartedAt,
                 EndedAt = dto.EndedAt,
                 MoveHistory = dto.MoveHistory,
-                WinnerUserId = dto.WinnerUserId
+                WinnerUserId = dto.WinnerUserId,
+                PlayerEmails = dto.PlayerEmails
             };
             await _mediator.Send(new SaveGameCommand(history));
         }

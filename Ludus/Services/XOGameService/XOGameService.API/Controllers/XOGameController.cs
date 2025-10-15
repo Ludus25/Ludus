@@ -32,6 +32,18 @@ namespace XOGameService.API.Controllers
             return "anonymous";
         }
 
+        private string ActingUserEmail()
+        {
+            if (Request.Headers.TryGetValue("X-UserEmail", out var value))
+            {
+                return value.ToString();
+            }
+
+            _logger.LogWarning("Missing X-UserEmail header in request from {RemoteIp}",
+                HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown");
+            return "anonymusEmail";
+        }
+
         [HttpPost]
         public async Task<ActionResult<GameState>> CreateGame([FromBody] CreateGameDto createGameDto)
         {
@@ -53,7 +65,7 @@ namespace XOGameService.API.Controllers
         [HttpPost("{id}/move")]
         public async Task<ActionResult<GameState>> Move(string id, [FromBody] MakeMoveDto makeMoveDto)
         {
-            var gameState = await _gameService.MakeMove(id, makeMoveDto.CellIndex, makeMoveDto.Version, ActingUserId());
+            var gameState = await _gameService.MakeMove(id, makeMoveDto.CellIndex, makeMoveDto.Version, ActingUserId(), ActingUserEmail());
             return Ok(gameState);
         }
 
