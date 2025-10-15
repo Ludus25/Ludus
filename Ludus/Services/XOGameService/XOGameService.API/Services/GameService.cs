@@ -7,6 +7,7 @@ using XOGameService.API.Hubs;
 using XOGameService.API.Models;
 using XOGameService.API.Models.Enums;
 using XOGameService.API.Repositories;
+using Common.Entities;
 
 namespace XOGameService.API.Services
 {
@@ -103,6 +104,8 @@ namespace XOGameService.API.Services
             currentState.Version++;
             currentState.UpdatedAt = DateTime.UtcNow;
 
+            currentState.MoveHistory = string.IsNullOrEmpty(currentState.MoveHistory) ? cellIndex.ToString() : $"{currentState.MoveHistory},{cellIndex.ToString()}";
+
             bool isWinning = IsWinning(currentState.Cells, expectedPlayerEnum);
             bool isFull = IsFull(currentState.Cells);
 
@@ -121,9 +124,9 @@ namespace XOGameService.API.Services
                 await _publishEndpoint.Publish(new GameEndedEvent(
                     MatchId: currentState.GameId,
                     PlayerUserIds: new List<string> { currentState.PlayerXId, currentState.PlayerOId },
-                    StartedAt: DateTime.UtcNow,
+                    StartedAt: currentState.CreatedAt,
                     EndedAt: DateTime.UtcNow,
-                    MoveHistory: string.Empty,
+                    MoveHistory: currentState.MoveHistory,
                     WinnerUserId: winnerUserId
                     ));
             }
