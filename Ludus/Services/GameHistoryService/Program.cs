@@ -38,38 +38,6 @@ internal class Program
             });
         });
 
-        // JWT settings
-        //var jwtSection = builder.Configuration.GetSection("Jwt");
-        //var jwtKey = jwtSection.GetValue<string>("Key");
-        //if (string.IsNullOrEmpty(jwtKey))
-        //{
-        //    Console.WriteLine("Warning: JWT Key not configured. API will run without authentication if no key is provided.");
-        //}
-        //else
-        //{
-        //    var keyBytes = Encoding.UTF8.GetBytes(jwtKey);
-        //    builder.Services.AddAuthentication(options =>
-        //    {
-        //        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        //        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        //    })
-        //    .AddJwtBearer(options =>
-        //    {
-        //        options.RequireHttpsMetadata = false;
-        //        options.SaveToken = true;
-        //        options.TokenValidationParameters = new TokenValidationParameters
-        //        {
-        //            ValidateIssuer = !string.IsNullOrEmpty(jwtSection.GetValue<string>("Issuer")),
-        //            ValidIssuer = jwtSection.GetValue<string>("Issuer"),
-        //            ValidateAudience = !string.IsNullOrEmpty(jwtSection.GetValue<string>("Audience")),
-        //            ValidAudience = jwtSection.GetValue<string>("Audience"),
-        //            ValidateIssuerSigningKey = true,
-        //            IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
-        //            ValidateLifetime = true
-        //        };
-        //    });
-        //}
-
         // DbContext
         builder.Services.AddDbContext<GameHistoryDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnectionString")));
 
@@ -95,11 +63,6 @@ internal class Program
                             statusCode: StatusCodes.Status500InternalServerError));
 
         app.UseRouting();
-
-        //if (!string.IsNullOrEmpty(jwtKey))
-        //{
-        //    app.UseAuthentication();
-        //}
         
         app.UseAuthorization();
 
