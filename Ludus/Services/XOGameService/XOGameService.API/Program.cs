@@ -17,13 +17,13 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = builder.Configuration.GetValue<string>("RedisCacheSettings:ConnectionString");
 });
 
-
 builder.Services.AddMassTransit(x =>
 {
     x.UsingRabbitMq((context, cfg) =>
-        {
-            cfg.Host(builder.Configuration["RabbitMQ:HostAddress"]);
-        });
+    {
+        cfg.Host(builder.Configuration["RabbitMQ:HostAddress"]);
+    });
+});
 
 builder.Services.AddScoped<IXOGameService, GameService>();
 
