@@ -1,0 +1,12 @@
+namespace Messaging
+{
+    public class RabbitMQSettings
+    {
+        public string HostName { get; set; } = "localhost";
+        public int Port { get; set; } = 5672;
+        public string UserName { get; set; } = "guest";
+        public string Password { get; set; } = "guest";
+        public string GameEndedQueue { get; set; } = "game_ended";
+        public string ChatLogQueue { get; set; } = "chat_log";
+    }
+}

@@ -1,4 +1,14 @@
 services:
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+
+  gamehistoryservicedb:
+    image: postgres
+
+  pgadmin:
+    image: dpage/pgadmin4
+      
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
 
@@ -34,6 +44,12 @@ services:
       - xogamedb
     ports:
       - "8001:8080"
+
+  gamehistoryservice:
+    image: ${DOCKER_REGISTRY-}gamehistoryservice
+    build:
+      context: .
+      dockerfile: Services/GameHistoryService/Dockerfile
 
   authenticationservice:
     image: authenticationservice
@@ -76,5 +92,7 @@ services:
       dockerfile: Services/matchmaking/MatchmakingService/Dockerfile
 
 volumes:
-  postgres-data:
   mssql_data:
+  postgres_data:
+  pgadmin_data:
+  rabbitmq_data:

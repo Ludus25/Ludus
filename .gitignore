@@ -60,6 +60,7 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+[Oo]ut/
 
 # Visual Studio 2019/2022 cache/options directory
 .vs/
