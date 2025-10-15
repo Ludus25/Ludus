@@ -17,6 +17,7 @@
     <PackageReference Include="Grpc.AspNetCore" Version="2.59.0" />
 	<PackageReference Include="MassTransit" Version="8.5.4" />
 	<PackageReference Include="MassTransit.RabbitMQ" Version="8.5.4" />
+	<ProjectReference Include="..\..\Common\Common.csproj" />
     <Protobuf Include="Protos/game.proto" GrpcServices="Server" />
   </ItemGroup>
 
