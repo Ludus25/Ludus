@@ -1,13 +1,14 @@
-using Microsoft.EntityFrameworkCore;
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using MassTransit;
-using MediatR;
-
+using Consumers;
 using Data;
 using Interfaces;
-using Consumers;
+using MassTransit;
+using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Text;
 
 internal class Program
 {
@@ -112,6 +113,19 @@ internal class Program
         }
 
         app.MapControllers();
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<GameHistoryDbContext>();
+            try
+            {
+                db.Database.Migrate();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[EF MIGRATE] Failed to run migrations: {ex}");
+            }
+        }
 
         app.Run();
     }

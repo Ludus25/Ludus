@@ -11,8 +11,9 @@ services:
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "check_running"]
       interval: 10s
-      timeout: 5s
-      retries: 4
+      timeout: 4s
+      retries: 20
+      start_period: 60s
 
   gamehistoryservicedb:
     container_name: gamehistorydb
@@ -24,7 +25,7 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d GameHistoryServiceDb"]
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 5432 -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
       interval: 10s
       timeout: 5s
       retries: 4
@@ -53,6 +54,12 @@ services:
     volumes:
       - mssql_data:/var/opt/mssql/data
     user: root
+    healthcheck:
+      test: ["CMD-SHELL", "bash -lc '</dev/tcp/127.0.0.1/1433'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
 
   xogamedb:
     container_name: xogamedb
@@ -66,13 +73,17 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - "RedisCacheSettings:ConnectionString=xogamedb:6379"
+      - "RabbitMQ:HostAddress=amqp://guest:guest@rabbitmq:5672"
       - "Kestrel__Endpoints__Http__Url=http://+:8080"
       - "Kestrel__Endpoints__Http__Protocols=Http1"
       - "Kestrel__Endpoints__Grpc__Url=http://+:8081"
       - "Kestrel__Endpoints__Grpc__Protocols=Http2"
       - "GameFrontendUrl=http://localhost:5173"
     depends_on:
-      - xogamedb
+      xogamedb:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     ports:
       - "8001:8080"  # REST API (HTTP/1.1)
       - "8082:8081"  # gRPC (HTTP/2)
@@ -84,7 +95,8 @@ services:
       - ASPNETCORE_HTTP_PORTS=8080
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=Ludus;User Id=sa;Password=LudusBaza123!;TrustServerCertificate=True;
     depends_on:
-      - sqlserver
+      sqlserver:
+        condition: service_healthy
     ports:
       - "7000:8080"
 
@@ -131,6 +143,6 @@ services:
         condition: service_healthy
       gamehistoryservicedb:
         condition: service_healthy
-    restart: on-failure
+    restart: unless-stopped
     ports:
       - "8002:80"

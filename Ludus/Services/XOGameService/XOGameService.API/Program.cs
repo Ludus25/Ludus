@@ -1,3 +1,4 @@
+using MassTransit;
 using StackExchange.Redis;
 using XOGameService.API.Hubs;
 using XOGameService.API.Middlewares;
@@ -15,6 +16,16 @@ builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration.GetValue<string>("RedisCacheSettings:ConnectionString");
 });
+
+builder.Services.AddMassTransit(x =>
+{
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host(builder.Configuration["RabbitMQ:HostAddress"]);
+    });
+});
+
+builder.Services.AddScoped<IXOGameService, GameService>();
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
     ConnectionMultiplexer.Connect(builder.Configuration.GetValue<string>("RedisCacheSettings:ConnectionString"))
