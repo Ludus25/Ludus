@@ -22,10 +22,12 @@ const ProtectedRoute: React.FC<{ element: React.ReactElement }> = ({ element }) 
 
     window.addEventListener('storage', handleStorageChange)
     window.addEventListener('authChanged', handleStorageChange)
+    window.addEventListener('beforeunload', handleStorageChange);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange)
       window.removeEventListener('authChanged', handleStorageChange)
+      window.removeEventListener('beforeunload', handleStorageChange);
     }
   }, [])
 
@@ -33,6 +35,16 @@ const ProtectedRoute: React.FC<{ element: React.ReactElement }> = ({ element }) 
 }
 
 export default function App() {
+   useEffect(() => {
+    const sessionFlag = sessionStorage.getItem('sessionActive')
+    
+    if (!sessionFlag) {
+      
+      localStorage.removeItem('token')
+      sessionStorage.setItem('sessionActive', 'true')
+    }
+  }, [])
+
   return (
     <BrowserRouter>
       <div

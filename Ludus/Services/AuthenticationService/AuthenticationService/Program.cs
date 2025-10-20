@@ -6,11 +6,8 @@ using AuthenticationService.Data;
 using AuthenticationService.Entities;
 using System.Text;
 using AuthenticationService.Services;
-using AuthenticationService.Data;
-using AuthenticationService.Entities;
-using AuthenticationService.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using System.Security.Claims;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +15,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5173") 
+        policy.WithOrigins("http://localhost:5173")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -102,7 +99,7 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     options.User.AllowedUserNameCharacters =
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
 
-   
+
 })
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
@@ -136,45 +133,80 @@ if (app.Environment.IsDevelopment())
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
 
-    var db = services.GetRequiredService<AppDbContext>();
     try
     {
+        var db = services.GetRequiredService<AppDbContext>();
         db.Database.Migrate();
+        logger.LogInformation("Database migration completed successfully.");
+
+        var userManager = services.GetRequiredService<UserManager<User>>();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+
+        await SeedAdminAndRoles(userManager, roleManager, logger);
     }
-    catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 1801) // Database already exists
+    catch (Exception ex)
     {
-        app.Logger.LogInformation("Database already exists; continuing startup.");
+        logger.LogError(ex, "An error occurred during database migration or seeding.");
     }
-
-    //var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-    //await SeedRoles(roleManager);
-}
-/*static async Task SeedRoles(RoleManager<IdentityRole> roleManager)
-
-{
-    if (!await roleManager.RoleExistsAsync("Admin"))
-        await roleManager.CreateAsync(new IdentityRole("Admin"));
-
-    if (!await roleManager.RoleExistsAsync("User"))
-        await roleManager.CreateAsync(new IdentityRole("User"));
-}*/
-
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    var conn = db.Database.GetDbConnection();
-    Console.WriteLine($"[EF DB CHECK] DataSource={conn.DataSource}; Database={conn.Database}");
 }
 
 app.UseHttpsRedirection();
-
 app.UseCors("AllowFrontend");
-
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
+
+static async Task SeedAdminAndRoles(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, ILogger logger)
+{
+
+    if (!await roleManager.RoleExistsAsync("Admin"))
+    {
+        await roleManager.CreateAsync(new IdentityRole("Admin"));
+        logger.LogInformation("Admin role created.");
+    }
+
+   
+    if (!await roleManager.RoleExistsAsync("User"))
+    {
+        await roleManager.CreateAsync(new IdentityRole("User"));
+        logger.LogInformation("User role created.");
+    }
+
+    var adminEmail = "ludusadm1@gmail.com";
+    var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
+
+    if (existingAdmin == null)
+    {
+        var admin = new User
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            EmailConfirmed = true,
+            name = "Admin",
+            surname = "Admin",
+            mlb = "1203998710890",
+            TwoFactorEnabled = true
+        };
+
+        var result = await userManager.CreateAsync(admin, "Admin123!");
+
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(admin, "Admin");
+            logger.LogInformation("Admin user created successfully.");
+        }
+        else
+        {
+            logger.LogError("Failed to create admin user: {Errors}",
+                string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
+    }
+    else
+    {
+        logger.LogInformation("Admin user already exists.");
+    }
+}
